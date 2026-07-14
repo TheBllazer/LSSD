@@ -58,6 +58,16 @@ service cloud.firestore {
       allow delete: if isGraded();
     }
 
+    match /criminalRecords/{docId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if isGraded();
+    }
+
+    match /arrestReports/{docId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if isGraded();
+    }
+
     // --- Rapports : workflow de validation ---
     match /reports/{docId} {
       allow read: if isSignedIn();

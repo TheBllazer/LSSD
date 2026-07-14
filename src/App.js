@@ -14,6 +14,9 @@ import Reports from './pages/Reports';
 import Agents from './pages/Agents';
 import Investigations from './pages/Investigations';
 import GangGroups from './pages/GangGroups';
+import CriminalRecord from './pages/CriminalRecord';
+import ArrestReports from './pages/ArrestReports';
+import CitizenProfile from './pages/CitizenProfile';
 
 // Components
 import Navigation from './components/Navigation';
@@ -62,12 +65,15 @@ function App() {
             <Routes>
               <Route path="/dashboard" element={<Dashboard user={user} userRole={userRole} />} />
               <Route path="/citizens" element={<Citizens user={user} userRole={userRole} />} />
+              <Route path="/citizens/:id" element={<CitizenProfile user={user} userRole={userRole} />} />
               <Route path="/vehicles" element={<Vehicles user={user} userRole={userRole} />} />
               <Route path="/weapons" element={<Weapons user={user} userRole={userRole} />} />
               <Route path="/reports" element={<Reports user={user} userRole={userRole} />} />
               <Route path="/agents" element={<Agents user={user} userRole={userRole} />} />
               <Route path="/investigations" element={<Investigations user={user} userRole={userRole} />} />
               <Route path="/gangs" element={<GangGroups user={user} userRole={userRole} />} />
+              <Route path="/criminal-record" element={<CriminalRecord user={user} userRole={userRole} />} />
+              <Route path="/arrest-reports" element={<ArrestReports user={user} userRole={userRole} />} />
               <Route path="*" element={<Navigate to="/dashboard" />} />
             </Routes>
           </main>

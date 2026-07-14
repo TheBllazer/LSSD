@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { Plus, Trash2, Edit2, Search } from 'lucide-react';
+import { Plus, Trash2, Edit2, Search, Eye } from 'lucide-react';
 import ImageUploader from '../components/ImageUploader';
 import RichTextEditor from '../components/RichTextEditor';
 import { isGraded } from '../utils/permissions';
@@ -221,6 +222,9 @@ function Citizens({ userRole }) {
                 {citizen.address && <p><strong>Adresse:</strong> {citizen.address}</p>}
               </div>
               <div className="citizen-actions">
+                <Link to={`/citizens/${citizen.id}`} className="btn-icon" title="Voir la fiche">
+                  <Eye size={16} />
+                </Link>
                 <button onClick={() => handleEdit(citizen)} className="btn-icon">
                   <Edit2 size={16} />
                 </button>

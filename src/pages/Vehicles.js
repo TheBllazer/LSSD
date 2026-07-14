@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { Plus, Trash2, Edit2, Search } from 'lucide-react';
 import ImageUploader from '../components/ImageUploader';
 import RichTextEditor from '../components/RichTextEditor';
+import CitizenSelect from '../components/CitizenSelect';
 import { isGraded } from '../utils/permissions';
 import './Pages.css';
 
@@ -21,7 +23,8 @@ function Vehicles({ userRole }) {
     plate: '',
     vin: '',
     category: 'car',
-    owner: '',
+    ownerId: '',
+    ownerName: '',
     photoUrl: '',
     notes: ''
   });
@@ -65,7 +68,8 @@ function Vehicles({ userRole }) {
         plate: '',
         vin: '',
         category: 'car',
-        owner: '',
+        ownerId: '',
+        ownerName: '',
         photoUrl: '',
         notes: ''
       });
@@ -96,7 +100,8 @@ function Vehicles({ userRole }) {
   const filteredVehicles = vehicles.filter(vehicle =>
     vehicle.plate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     vehicle.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.model?.toLowerCase().includes(searchTerm.toLowerCase())
+    vehicle.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vehicle.ownerName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -159,10 +164,11 @@ function Vehicles({ userRole }) {
                 <label>VIN</label>
                 <input type="text" value={formData.vin} onChange={(e) => setFormData({...formData, vin: e.target.value})} />
               </div>
-              <div className="form-group">
-                <label>Propriétaire</label>
-                <input type="text" value={formData.owner} onChange={(e) => setFormData({...formData, owner: e.target.value})} />
-              </div>
+              <CitizenSelect
+                label="Propriétaire (registre des citoyens)"
+                value={formData.ownerId}
+                onChange={({ id, name }) => setFormData({ ...formData, ownerId: id, ownerName: name })}
+              />
             </div>
 
             <div className="form-group">
@@ -203,7 +209,7 @@ function Vehicles({ userRole }) {
                   <td>{vehicle.make}</td>
                   <td>{vehicle.model}</td>
                   <td>{vehicle.category}</td>
-                  <td>{vehicle.owner}</td>
+                  <td>{vehicle.ownerId ? <Link to={`/citizens/${vehicle.ownerId}`}>{vehicle.ownerName}</Link> : (vehicle.ownerName || '—')}</td>
                   <td>
                     <button onClick={() => handleEdit(vehicle)} className="btn-icon"><Edit2 size={16} /></button>
                     {isGraded(userRole) && (

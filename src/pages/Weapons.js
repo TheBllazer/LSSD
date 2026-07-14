@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { Plus, Trash2, Edit2, Search } from 'lucide-react';
 import RichTextEditor from '../components/RichTextEditor';
+import CitizenSelect from '../components/CitizenSelect';
 import { isGraded } from '../utils/permissions';
 import './Pages.css';
 
@@ -16,7 +18,8 @@ function Weapons({ userRole }) {
     model: '',
     serialNumber: '',
     type: 'Pistolet',
-    owner: '',
+    ownerId: '',
+    ownerName: '',
     registrationDate: '',
     notes: ''
   });
@@ -49,7 +52,7 @@ function Weapons({ userRole }) {
       } else {
         await addDoc(collection(db, 'weapons'), { ...formData, createdAt: new Date() });
       }
-      setFormData({ model: '', serialNumber: '', type: 'Pistolet', owner: '', registrationDate: '', notes: '' });
+      setFormData({ model: '', serialNumber: '', type: 'Pistolet', ownerId: '', ownerName: '', registrationDate: '', notes: '' });
       setShowForm(false);
       fetchWeapons();
     } catch (error) {
@@ -77,7 +80,7 @@ function Weapons({ userRole }) {
   const filteredWeapons = weapons.filter(weapon =>
     weapon.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     weapon.serialNumber?.includes(searchTerm) ||
-    weapon.owner?.toLowerCase().includes(searchTerm.toLowerCase())
+    weapon.ownerName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -116,10 +119,11 @@ function Weapons({ userRole }) {
             </div>
 
             <div className="form-row">
-              <div className="form-group">
-                <label>Propriétaire</label>
-                <input type="text" value={formData.owner} onChange={(e) => setFormData({...formData, owner: e.target.value})} />
-              </div>
+              <CitizenSelect
+                label="Propriétaire (registre des citoyens)"
+                value={formData.ownerId}
+                onChange={({ id, name }) => setFormData({ ...formData, ownerId: id, ownerName: name })}
+              />
               <div className="form-group">
                 <label>Date d'enregistrement</label>
                 <input type="date" value={formData.registrationDate} onChange={(e) => setFormData({...formData, registrationDate: e.target.value})} />
@@ -158,7 +162,7 @@ function Weapons({ userRole }) {
                   <td>{weapon.type}</td>
                   <td>{weapon.model}</td>
                   <td>{weapon.serialNumber}</td>
-                  <td>{weapon.owner}</td>
+                  <td>{weapon.ownerId ? <Link to={`/citizens/${weapon.ownerId}`}>{weapon.ownerName}</Link> : (weapon.ownerName || '—')}</td>
                   <td>{weapon.registrationDate}</td>
                   <td>
                     <button onClick={() => handleEdit(weapon)} className="btn-icon"><Edit2 size={16} /></button>

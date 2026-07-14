@@ -3,6 +3,7 @@ import { db } from '../firebase';
 import { collection, query, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { Plus, Trash2, Edit2, Search, AlertTriangle } from 'lucide-react';
 import RichTextEditor from '../components/RichTextEditor';
+import GangSelect from '../components/GangSelect';
 import { isGraded } from '../utils/permissions';
 import './Pages.css';
 
@@ -21,6 +22,8 @@ function Investigations({ userRole }) {
     startDate: new Date().toISOString().split('T')[0],
     suspect: '',
     victims: '',
+    gangId: '',
+    gangName: '',
     details: ''
   });
 
@@ -62,6 +65,8 @@ function Investigations({ userRole }) {
         startDate: new Date().toISOString().split('T')[0],
         suspect: '',
         victims: '',
+        gangId: '',
+        gangName: '',
         details: ''
       });
       setShowForm(false);
@@ -167,6 +172,11 @@ function Investigations({ userRole }) {
               </div>
             </div>
 
+            <GangSelect
+              value={formData.gangId}
+              onChange={({ id, name }) => setFormData({ ...formData, gangId: id, gangName: name })}
+            />
+
             <div className="form-group">
               <label>Détails</label>
               <RichTextEditor value={formData.details} onChange={(content) => setFormData({...formData, details: content})} placeholder="Détails de l'enquête..." />
@@ -192,6 +202,7 @@ function Investigations({ userRole }) {
                 <p><strong>Titre:</strong> {investigation.title}</p>
                 <p><strong>Suspect:</strong> {investigation.suspect}</p>
                 <p><strong>Victime(s):</strong> {investigation.victims}</p>
+                {investigation.gangName && <p><strong>Groupe lié:</strong> {investigation.gangName}</p>}
                 <p><strong>Agent:</strong> {investigation.lead}</p>
                 <p><strong>Date:</strong> {investigation.startDate}</p>
               </div>

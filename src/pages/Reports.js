@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { Plus, Trash2, Edit2, Search, Download, Check, X as XIcon } from 'lucide-react';
 import RichTextEditor from '../components/RichTextEditor';
+import CitizenSelect from '../components/CitizenSelect';
 import { generatePDF } from '../utils/pdfGenerator';
 import { createGradedNotification } from '../utils/notifications';
 import { canValidateReports, canEditReport, canDeleteReport } from '../utils/permissions';
@@ -23,7 +25,6 @@ const emptyForm = {
 
 function Reports({ user, userRole }) {
   const [reports, setReports] = useState([]);
-  const [citizens, setCitizens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,7 +37,6 @@ function Reports({ user, userRole }) {
 
   useEffect(() => {
     fetchReports();
-    fetchCitizens();
   }, []);
 
   const fetchReports = async () => {
@@ -50,25 +50,6 @@ function Reports({ user, userRole }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchCitizens = async () => {
-    try {
-      const q = query(collection(db, 'citizens'));
-      const querySnapshot = await getDocs(q);
-      setCitizens(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    } catch (error) {
-      console.error('Erreur:', error);
-    }
-  };
-
-  const handleSuspectChange = (citizenId) => {
-    const citizen = citizens.find(c => c.id === citizenId);
-    setFormData({
-      ...formData,
-      suspectId: citizenId,
-      suspectName: citizen ? `${citizen.firstName} ${citizen.lastName}` : '',
-    });
   };
 
   const handleSubmit = async (e) => {
@@ -184,15 +165,11 @@ function Reports({ user, userRole }) {
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Suspect (registre des citoyens)</label>
-              <select value={formData.suspectId} onChange={(e) => handleSuspectChange(e.target.value)}>
-                <option value="">-- Sélectionner un citoyen --</option>
-                {citizens.map(c => (
-                  <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>
-                ))}
-              </select>
-            </div>
+            <CitizenSelect
+              label="Suspect (registre des citoyens)"
+              value={formData.suspectId}
+              onChange={({ id, name }) => setFormData({ ...formData, suspectId: id, suspectName: name })}
+            />
 
             <div className="form-group">
               <label>Lieu</label>
@@ -234,7 +211,7 @@ function Reports({ user, userRole }) {
                   <td>{report.date}</td>
                   <td>{report.officer}</td>
                   <td><span className="badge">{report.type}</span></td>
-                  <td>{report.suspectName || '—'}</td>
+                  <td>{report.suspectId ? <Link to={`/citizens/${report.suspectId}`}>{report.suspectName}</Link> : (report.suspectName || '—')}</td>
                   <td><span className={`status-badge status-${report.status?.toLowerCase()}`}>{report.status}</span></td>
                   <td>
                     <span className={`status-badge status-${report.validationStatus === 'Validé' ? 'actif' : report.validationStatus === 'Refusé' ? 'inactif' : 'attente'}`}>

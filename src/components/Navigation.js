@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import { Menu, X, LogOut, Home, Users, Truck, Crosshair, FileText, Search, AlertTriangle } from 'lucide-react';
+import { Menu, X, LogOut, Home, Users, Truck, Crosshair, FileText, Search, AlertTriangle, Scale, Lock } from 'lucide-react';
 import { isGraded } from '../utils/permissions';
 import NotificationBell from './NotificationBell';
 import badgeIcon from '../assets/icons/badge.svg';
@@ -38,6 +38,8 @@ function Navigation({ user, userRole }) {
     { name: 'Véhicules', path: '/vehicles', icon: Truck },
     { name: 'Armes', path: '/weapons', icon: Crosshair },
     { name: 'Rapports', path: '/reports', icon: FileText },
+    { name: 'Casier judiciaire', path: '/criminal-record', icon: Scale },
+    { name: "Rapports d'arrestation", path: '/arrest-reports', icon: Lock },
     { name: 'Agents', path: '/agents', icon: AgentsIcon },
     { name: 'Enquêtes', path: '/investigations', icon: Search },
     { name: 'Groupes illégaux', path: '/gangs', icon: AlertTriangle },
