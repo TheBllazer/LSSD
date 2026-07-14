@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="description" content="LSSD Mobile Data Terminal" />
+    <title>LSSD MDT - Mobile Data Terminal</title>
+    <script type="text/javascript">
+      // Contrepartie du trick dans public/404.html : restaure la vraie URL
+      // avant que React Router ne prenne la main.
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&');
+            })
+            .join('?');
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #0f0f23;
+        color: #e0e0e0;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>Vous devez activer JavaScript pour utiliser cette application.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

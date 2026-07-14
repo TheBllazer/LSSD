@@ -1,0 +1,87 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Doit être tenu synchronisé avec GRADED_THRESHOLD dans src/utils/permissions.js
+    function isGraded() {
+      return myRole() in [
+        'Sheriff Adjoint', 'Major', 'Commander', 'Captain', 'Lieutenant', 'Sergent'
+      ];
+    }
+
+    // --- Comptes agents ---
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      // Un agent crée uniquement son propre profil, à l'inscription.
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      // Un agent peut modifier son propre profil mais pas son propre grade.
+      // Seul un gradé peut changer le grade de quelqu'un (y compris le sien).
+      allow update: if isSignedIn() && (
+        (request.auth.uid == userId && request.resource.data.role == resource.data.role) ||
+        isGraded()
+      );
+      allow delete: if isGraded();
+    }
+
+    // --- Registres opérationnels : lecture/écriture pour tout agent connecté ---
+    match /citizens/{docId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if isGraded();
+    }
+
+    match /vehicles/{docId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if isGraded();
+    }
+
+    match /weapons/{docId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if isGraded();
+    }
+
+    match /investigations/{docId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if isGraded();
+    }
+
+    match /gangs/{docId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if isGraded();
+    }
+
+    // --- Rapports : workflow de validation ---
+    match /reports/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      // Un gradé peut tout modifier (y compris valider/refuser).
+      // L'auteur peut modifier son rapport tant qu'il n'est pas validé,
+      // mais ne peut pas changer lui-même le statut de validation.
+      allow update: if isSignedIn() && (
+        isGraded() ||
+        (
+          resource.data.authorId == request.auth.uid &&
+          resource.data.validationStatus != 'Validé' &&
+          request.resource.data.validationStatus == resource.data.validationStatus
+        )
+      );
+      allow delete: if isGraded();
+    }
+
+    // --- Notifications destinées aux gradés ---
+    match /notifications/{docId} {
+      allow read: if isGraded();
+      allow create: if isSignedIn();
+      allow update: if isGraded();
+      allow delete: if isGraded();
+    }
+  }
+}

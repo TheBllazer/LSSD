@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LSSD MDT</title>
+    <script type="text/javascript">
+      // Trick standard pour faire fonctionner React Router (BrowserRouter)
+      // sur GitHub Pages, qui est un hébergement 100% statique sans
+      // réécriture d'URL côté serveur.
+      // segmentCount = 0 car l'app est servie à la racine du domaine perso
+      // (lssd.thebllazer.fr). Si tu repasses sur thebllazer.github.io/LSSD,
+      // remets segmentCount = 1.
+      var segmentCount = 0;
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body></body>
+</html>
