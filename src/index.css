@@ -1,31 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 /*
-  Palette LSSD — dérivée de l'uniforme et de l'écusson du Sheriff's
-  Department (kaki, or/laiton, bleu marine insigne, vert olive écusson).
+  Système LSSD MDT — inspiré du matériel de dispatch/records réel :
+  châssis gris-anthracite neutre, accent or/laiton de l'écusson utilisé
+  avec parcimonie (branding, statut actif), pas de dégradés décoratifs.
 */
 :root {
-  --lssd-navy-darkest: #0A0E1A;
-  --lssd-navy-dark: #12192B;
-  --lssd-navy: #1B2A44;
-  --lssd-navy-panel: #23364F;
-  --lssd-olive: #2E3A24;
-  --lssd-gold: #C9A227;
-  --lssd-gold-light: #E8C55C;
-  --lssd-gold-dark: #A6841C;
-  --lssd-tan: #A79B7C;
-  --lssd-tan-dim: #7A7460;
-  --lssd-cream: #EDE6D6;
-  --lssd-brown: #5C4326;
-  --lssd-danger: #A33B2E;
-  --lssd-danger-light: #D9695A;
-  --lssd-success: #6FA050;
-  --lssd-warning: #D9A441;
-  --lssd-amber: #C17817;
+  --bg-0: #17181A;
+  --bg-1: #1E201F;
+  --bg-2: #26282A;
+  --panel: #212423;
+  --line: #3A3D38;
+  --line-strong: #4A4D46;
 
-  --font-display: 'Bebas Neue', 'Arial Narrow', sans-serif;
+  --gold: #C9A227;
+  --gold-light: #DDBB4E;
+  --gold-dim: #8C7420;
+
+  --text: #E4E1D6;
+  --text-dim: #9B9787;
+  --text-faint: #6B6858;
+
+  --status-ok: #4C8C3C;
+  --status-ok-bg: rgba(76, 140, 60, 0.12);
+  --status-warn: #C98A2C;
+  --status-warn-bg: rgba(201, 138, 44, 0.12);
+  --status-bad: #B0392C;
+  --status-bad-bg: rgba(176, 57, 44, 0.12);
+  --status-info: #5C7A8A;
+  --status-info-bg: rgba(92, 122, 138, 0.12);
+
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
   --font-body: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  --radius: 3px;
+  --topbar-h: 34px;
 }
 
 * {
@@ -36,12 +46,10 @@
 
 body {
   font-family: var(--font-body);
-  background:
-    radial-gradient(ellipse at top, rgba(201, 162, 39, 0.05) 0%, transparent 55%),
-    linear-gradient(135deg, var(--lssd-navy-darkest) 0%, var(--lssd-navy-dark) 100%);
-  background-attachment: fixed;
-  color: var(--lssd-cream);
+  background: var(--bg-0);
+  color: var(--text);
   min-height: 100vh;
+  font-size: 14px;
 }
 
 #root {
@@ -54,35 +62,40 @@ html {
 
 h1, h2, h3 {
   font-family: var(--font-display);
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
-code, .mono, input[type="date"] {
+code, .mono, input[type="date"], .data-cell {
   font-family: var(--font-mono);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--lssd-navy-dark);
+  background: var(--bg-1);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--lssd-gold);
-  border-radius: 4px;
+  background: var(--line-strong);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--lssd-gold-light);
+  background: var(--gold-dim);
 }
 
 /* Selection */
 ::selection {
-  background-color: var(--lssd-gold);
-  color: var(--lssd-navy-darkest);
+  background-color: var(--gold);
+  color: var(--bg-0);
 }

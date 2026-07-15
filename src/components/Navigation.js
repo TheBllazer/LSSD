@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { Menu, X, LogOut, Home, Users, Truck, Crosshair, FileText, Search, AlertTriangle, Scale, Lock } from 'lucide-react';
@@ -68,10 +68,10 @@ function Navigation({ user, userRole }) {
             const Icon = item.icon;
             return (
               <li key={item.path}>
-                <Link to={item.path} onClick={() => setIsOpen(false)}>
+                <NavLink to={item.path} onClick={() => setIsOpen(false)}>
                   <Icon size={18} />
                   <span>{item.name}</span>
-                </Link>
+                </NavLink>
               </li>
             );
           })}

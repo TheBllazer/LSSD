@@ -124,6 +124,10 @@ function Login() {
           </p>
         </div>
       </div>
+
+      <p className="login-footer-note" style={{ maxWidth: '380px', width: '100%' }}>
+        Système réservé au personnel autorisé du LSSD
+      </p>
     </div>
   );
 }

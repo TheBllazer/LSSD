@@ -13,10 +13,10 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: 4px;
-  border: 1px solid #C9A227;
-  background: rgba(201, 162, 39, 0.05);
-  color: #C9A227;
+  border-radius: var(--radius);
+  border: 1px solid var(--gold);
+  background: var(--bg-2);
+  color: var(--gold);
 }
 
 .url-input-row input {
@@ -24,17 +24,17 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #EDE6D6;
+  color: var(--text);
   font-size: 13px;
 }
 
 .url-input-row input::placeholder {
-  color: #7A7460;
+  color: var(--text-faint);
 }
 
 .url-hint {
   font-size: 12px;
-  color: #A79B7C;
+  color: var(--text-dim);
   margin: 0;
 }
 
@@ -47,8 +47,8 @@
 .image-preview img {
   max-width: 200px;
   max-height: 200px;
-  border-radius: 4px;
-  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
   display: block;
 }
 
@@ -61,10 +61,10 @@
   justify-content: center;
   gap: 8px;
   padding: 12px;
-  border-radius: 4px;
-  border: 1px dashed rgba(217, 105, 90, 0.5);
-  background: rgba(163, 59, 46, 0.05);
-  color: #D9695A;
+  border-radius: var(--radius);
+  border: 1px dashed var(--status-bad);
+  background: var(--status-bad-bg);
+  color: var(--status-bad);
   font-size: 12px;
   text-align: center;
 }
@@ -73,9 +73,9 @@
   position: absolute;
   top: -8px;
   right: -8px;
-  background: #A33B2E;
+  background: var(--status-bad);
   border: none;
-  color: #F5F0E4;
+  color: var(--text);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -87,7 +87,7 @@
 }
 
 .image-uploader .error-message {
-  color: #D9695A;
+  color: var(--status-bad);
   font-size: 12px;
   margin: 6px 0 0;
 }

@@ -1,15 +1,15 @@
 .app-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0A0E1A 0%, #12192B 100%);
+  background: var(--bg-0);
 }
 
 .main-content {
   flex: 1;
   margin-left: 250px;
-  padding: 20px;
+  padding: calc(var(--topbar-h) + 24px) 28px 28px;
   overflow-y: auto;
-  animation: fadeIn 0.3s ease-in;
+  animation: fadeIn 0.2s ease-in;
 }
 
 @keyframes fadeIn {
@@ -24,6 +24,6 @@
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 10px;
+    padding: calc(var(--topbar-h) + 70px) 14px 20px;
   }
 }

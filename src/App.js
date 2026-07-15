@@ -20,6 +20,7 @@ import CitizenProfile from './pages/CitizenProfile';
 
 // Components
 import Navigation from './components/Navigation';
+import StatusBar from './components/StatusBar';
 import Loading from './components/Loading';
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
       {user ? (
         <div className="app-container">
           <Navigation user={user} userRole={userRole} />
+          <StatusBar user={user} userRole={userRole} />
           <main className="main-content">
             <Routes>
               <Route path="/dashboard" element={<Dashboard user={user} userRole={userRole} />} />
