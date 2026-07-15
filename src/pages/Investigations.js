@@ -101,11 +101,11 @@ function Investigations({ userRole }) {
 
   const getPriorityColor = (priority) => {
     switch(priority) {
-      case 'Basse': return '#00ff88';
-      case 'Normale': return '#00d4ff';
-      case 'Élevée': return '#ffd93d';
-      case 'Critique': return '#ff3333';
-      default: return '#00d4ff';
+      case 'Basse': return '#6FA050';
+      case 'Normale': return '#C9A227';
+      case 'Élevée': return '#D9A441';
+      case 'Critique': return '#A33B2E';
+      default: return '#C9A227';
     }
   };
 

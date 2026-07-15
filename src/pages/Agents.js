@@ -52,13 +52,13 @@ function Agents({ userRole }) {
       <div className="page-header">
         <h1>Gestion des Agents</h1>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <Shield size={20} style={{ color: '#00d4ff' }} />
-          <span style={{ color: '#a0a0a0' }}>{agents.length} agents actifs</span>
+          <Shield size={20} style={{ color: '#C9A227' }} />
+          <span style={{ color: '#A79B7C' }}>{agents.length} agents actifs</span>
         </div>
       </div>
 
       {!canManage && (
-        <p style={{ color: '#a0a0a0', fontSize: '13px', marginBottom: '10px' }}>
+        <p style={{ color: '#A79B7C', fontSize: '13px', marginBottom: '10px' }}>
           Seuls les gradés (Sergent et au-dessus) peuvent modifier les grades des agents.
         </p>
       )}

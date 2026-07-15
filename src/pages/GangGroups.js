@@ -90,11 +90,11 @@ function GangGroups({ userRole }) {
 
   const getThreatColor = (threat) => {
     switch(threat) {
-      case 'Faible': return '#00ff88';
-      case 'Moyen': return '#ffd93d';
-      case 'Élevé': return '#ff9d00';
-      case 'Critique': return '#ff3333';
-      default: return '#00d4ff';
+      case 'Faible': return '#6FA050';
+      case 'Moyen': return '#D9A441';
+      case 'Élevé': return '#C17817';
+      case 'Critique': return '#A33B2E';
+      default: return '#C9A227';
     }
   };
 
@@ -180,7 +180,7 @@ function GangGroups({ userRole }) {
       {loading ? <div className="loading">Chargement...</div> : (
         <div className="gangs-grid">
           {filteredGangs.map(gang => (
-            <div key={gang.id} className="gang-card" style={{ borderTopColor: gang.color || '#00d4ff' }}>
+            <div key={gang.id} className="gang-card" style={{ borderTopColor: gang.color || '#C9A227' }}>
               {gang.logoUrl && <img src={gang.logoUrl} alt={gang.name} className="gang-logo" />}
               <div className="gang-header">
                 <h3>{gang.name}</h3>

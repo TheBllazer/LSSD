@@ -1,19 +1,50 @@
 .login-container {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+  background: linear-gradient(135deg, #0A0E1A 0%, #12192B 100%);
+  overflow: hidden;
+}
+
+.login-container::before {
+  content: '';
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(circle, rgba(201, 162, 39, 0.07) 0%, transparent 60%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.login-container::after {
+  content: '';
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(8deg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A227' stroke-width='0.4'%3E%3Cpath d='M12 1.5l2.6 6.2 6.7.5-5.1 4.4 1.6 6.6L12 15.8l-5.8 3.4 1.6-6.6-5.1-4.4 6.7-.5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.06;
+  pointer-events: none;
 }
 
 .login-box {
-  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-  border: 2px solid #00d4ff;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, #1B2A44 0%, #23364F 100%);
+  border: 2px solid #C9A227;
   border-radius: 8px;
   padding: 50px 40px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 40px rgba(201, 162, 39, 0.2), inset 0 0 0 1px rgba(201, 162, 39, 0.15);
   animation: slideUp 0.5s ease-out;
 }
 
@@ -34,7 +65,7 @@
 }
 
 .shield-icon {
-  color: #00d4ff;
+  color: #C9A227;
   margin-bottom: 15px;
   animation: pulse 2s infinite;
 }
@@ -50,13 +81,13 @@
 
 .login-header h1 {
   font-size: 28px;
-  color: #00d4ff;
+  color: #C9A227;
   margin: 10px 0 5px 0;
   letter-spacing: 2px;
 }
 
 .login-header p {
-  color: #a0a0a0;
+  color: #A79B7C;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -76,7 +107,7 @@
 }
 
 .form-group label {
-  color: #00d4ff;
+  color: #C9A227;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -84,9 +115,9 @@
 }
 
 .form-group input {
-  background: rgba(0, 212, 255, 0.05);
-  border: 1px solid #00d4ff;
-  color: #e0e0e0;
+  background: rgba(201, 162, 39, 0.05);
+  border: 1px solid #C9A227;
+  color: #EDE6D6;
   padding: 12px 15px;
   border-radius: 4px;
   font-size: 14px;
@@ -94,19 +125,19 @@
 }
 
 .form-group input::placeholder {
-  color: #707070;
+  color: #8A8168;
 }
 
 .form-group input:focus {
   outline: none;
-  background: rgba(0, 212, 255, 0.1);
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  background: rgba(201, 162, 39, 0.1);
+  box-shadow: 0 0 10px rgba(201, 162, 39, 0.3);
 }
 
 .login-btn {
-  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  background: linear-gradient(135deg, #C9A227 0%, #A6841C 100%);
   border: none;
-  color: #0f0f23;
+  color: #0A0E1A;
   padding: 12px 20px;
   border-radius: 4px;
   font-weight: 700;
@@ -123,7 +154,7 @@
 
 .login-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+  box-shadow: 0 5px 20px rgba(201, 162, 39, 0.4);
 }
 
 .login-btn:disabled {
@@ -132,9 +163,9 @@
 }
 
 .error-message {
-  background: rgba(255, 50, 50, 0.1);
-  border: 1px solid #ff3232;
-  color: #ff6b6b;
+  background: rgba(163, 59, 46, 0.1);
+  border: 1px solid #A33B2E;
+  color: #D9695A;
   padding: 12px 15px;
   border-radius: 4px;
   font-size: 12px;
@@ -142,12 +173,12 @@
 
 .login-toggle {
   text-align: center;
-  border-top: 1px solid rgba(0, 212, 255, 0.2);
+  border-top: 1px solid rgba(201, 162, 39, 0.2);
   padding-top: 20px;
 }
 
 .login-toggle p {
-  color: #a0a0a0;
+  color: #A79B7C;
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -159,7 +190,7 @@
 .toggle-btn {
   background: none;
   border: none;
-  color: #00d4ff;
+  color: #C9A227;
   cursor: pointer;
   font-weight: 600;
   text-decoration: underline;
@@ -169,5 +200,5 @@
 }
 
 .toggle-btn:hover {
-  color: #00b8e6;
+  color: #E8C55C;
 }

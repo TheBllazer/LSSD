@@ -49,7 +49,12 @@ function Navigation({ user, userRole }) {
     <>
       <nav className="navigation">
         <div className="nav-header">
-          <h1 className="nav-title">LSSD MDT</h1>
+          <div className="nav-brand">
+            <svg className="nav-star" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 1.5l2.6 6.2 6.7.5-5.1 4.4 1.6 6.6L12 15.8l-5.8 3.4 1.6-6.6-5.1-4.4 6.7-.5z" />
+            </svg>
+            <h1 className="nav-title">LSSD MDT</h1>
+          </div>
           <div className="nav-header-actions">
             {graded && <NotificationBell />}
             <button className="hamburger" onClick={toggleMenu}>

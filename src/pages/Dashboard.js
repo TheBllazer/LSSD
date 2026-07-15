@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, query, getDocs } from 'firebase/firestore';
-import { Users, Truck, Crosshair, FileText, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Users, Truck, Crosshair, FileText, AlertTriangle, TrendingUp, Scale, Lock } from 'lucide-react';
 import './Dashboard.css';
 
 function Dashboard({ user, userRole }) {
@@ -11,7 +11,9 @@ function Dashboard({ user, userRole }) {
     weapons: 0,
     reports: 0,
     investigations: 0,
-    gangs: 0
+    gangs: 0,
+    criminalRecords: 0,
+    arrests: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -24,6 +26,8 @@ function Dashboard({ user, userRole }) {
         const reportsSnap = await getDocs(query(collection(db, 'reports')));
         const investigationsSnap = await getDocs(query(collection(db, 'investigations')));
         const gangsSnap = await getDocs(query(collection(db, 'gangs')));
+        const criminalRecordsSnap = await getDocs(query(collection(db, 'criminalRecords')));
+        const arrestsSnap = await getDocs(query(collection(db, 'arrestReports')));
 
         setStats({
           citizens: citizensSnap.size,
@@ -31,7 +35,9 @@ function Dashboard({ user, userRole }) {
           weapons: weaponsSnap.size,
           reports: reportsSnap.size,
           investigations: investigationsSnap.size,
-          gangs: gangsSnap.size
+          gangs: gangsSnap.size,
+          criminalRecords: criminalRecordsSnap.size,
+          arrests: arrestsSnap.size
         });
       } catch (error) {
         console.error('Erreur lors de la récupération des stats:', error);
@@ -44,12 +50,14 @@ function Dashboard({ user, userRole }) {
   }, []);
 
   const statCards = [
-    { icon: Users, label: 'Citoyens', value: stats.citizens, color: '#00d4ff' },
-    { icon: Truck, label: 'Véhicules', value: stats.vehicles, color: '#00ff88' },
-    { icon: Crosshair, label: 'Armes', value: stats.weapons, color: '#ff6b6b' },
-    { icon: FileText, label: 'Rapports', value: stats.reports, color: '#ffd93d' },
-    { icon: AlertTriangle, label: 'Enquêtes', value: stats.investigations, color: '#ff9d00' },
-    { icon: AlertTriangle, label: 'Groupes illégaux', value: stats.gangs, color: '#ff3333' }
+    { icon: Users, label: 'Citoyens', value: stats.citizens, color: '#C9A227' },
+    { icon: Truck, label: 'Véhicules', value: stats.vehicles, color: '#6FA050' },
+    { icon: Crosshair, label: 'Armes', value: stats.weapons, color: '#A33B2E' },
+    { icon: FileText, label: 'Rapports', value: stats.reports, color: '#D9A441' },
+    { icon: Scale, label: 'Casier judiciaire', value: stats.criminalRecords, color: '#A79B7C' },
+    { icon: Lock, label: "Rapports d'arrestation", value: stats.arrests, color: '#C17817' },
+    { icon: AlertTriangle, label: 'Enquêtes', value: stats.investigations, color: '#E8C55C' },
+    { icon: AlertTriangle, label: 'Groupes illégaux', value: stats.gangs, color: '#D9695A' }
   ];
 
   return (

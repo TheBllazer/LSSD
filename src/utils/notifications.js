@@ -19,8 +19,8 @@ export const showNotification = (message, type = 'info', duration = 3000) => {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: ${type === 'success' ? '#00ff88' : type === 'error' ? '#ff3333' : '#00d4ff'};
-    color: ${type === 'success' ? '#0f0f23' : type === 'error' ? '#fff' : '#0f0f23'};
+    background: ${type === 'success' ? '#6FA050' : type === 'error' ? '#A33B2E' : '#C9A227'};
+    color: ${type === 'success' ? '#0A0E1A' : type === 'error' ? '#F5F0E4' : '#0A0E1A'};
     padding: 15px 20px;
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);

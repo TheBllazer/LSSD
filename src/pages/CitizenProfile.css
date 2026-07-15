@@ -3,9 +3,9 @@
   gap: 20px;
   align-items: flex-start;
   padding: 20px;
-  border: 1px solid rgba(0, 212, 255, 0.2);
+  border: 1px solid rgba(201, 162, 39, 0.2);
   border-radius: 6px;
-  background: rgba(0, 212, 255, 0.03);
+  background: rgba(201, 162, 39, 0.03);
   margin-bottom: 25px;
 }
 
@@ -14,17 +14,17 @@
   height: 140px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid rgba(0, 212, 255, 0.3);
+  border: 1px solid rgba(201, 162, 39, 0.3);
 }
 
 .citizen-profile-header h1 {
   margin: 0 0 10px;
-  color: #00d4ff;
+  color: #C9A227;
 }
 
 .citizen-profile-notes {
   margin-top: 10px;
-  color: #a0a0a0;
+  color: #A79B7C;
   font-size: 13px;
 }
 
@@ -37,13 +37,13 @@
   align-items: center;
   gap: 8px;
   font-size: 16px;
-  color: #00d4ff;
+  color: #C9A227;
   margin-bottom: 10px;
-  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
   padding-bottom: 8px;
 }
 
 .profile-empty {
-  color: #6a6a8e;
+  color: #7A7460;
   font-size: 13px;
 }
