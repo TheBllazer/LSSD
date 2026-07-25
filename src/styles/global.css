@@ -1,0 +1,145 @@
+/* ==========================================================================
+   LSSD RMS — Styles globaux
+   Importe les jetons puis pose les règles transverses. Aucune règle de
+   composant ici : la mise en forme des composants passe par le thème MUI.
+   ========================================================================== */
+
+@import './tokens.css';
+@import './scrollbar.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--navy-900);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Application de bureau : le document lui-même ne défile jamais. */
+  overflow: hidden;
+  /* Empêche la sélection accidentelle du chrome ; réactivée sur le contenu. */
+  user-select: none;
+}
+
+/* Le contenu documentaire reste sélectionnable (copie de références, PV…). */
+input,
+textarea,
+[contenteditable='true'],
+.selectable,
+.MuiDataGrid-cell,
+.record-content {
+  user-select: text;
+}
+
+/* --- Focus visible : indispensable pour une application pilotée au clavier - */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- Liens ---------------------------------------------------------------- */
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* --- Typographie utilitaire ---------------------------------------------- */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.label-caps {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* --- Effet « shimmer » des squelettes de chargement ---------------------- */
+@keyframes lssd-shimmer {
+  0% {
+    background-position: -420px 0;
+  }
+  100% {
+    background-position: 420px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--navy-750) 0%,
+    var(--steel-600) 50%,
+    var(--navy-750) 100%
+  );
+  background-size: 420px 100%;
+  animation: lssd-shimmer 1.4s ease-in-out infinite;
+}
+
+/* --- Grille technique de fond (fine, quasi imperceptible) ---------------- */
+.tech-grid {
+  background-image:
+    linear-gradient(rgba(45, 125, 210, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 125, 210, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* --- Bandes de scan très légères sur les en-têtes de panneau ------------- */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.014) 0px,
+    rgba(255, 255, 255, 0.014) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* --- Impression : on n'imprime jamais l'interface, uniquement les PDF ---- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+}
+
+/* --- Respect des préférences d'accessibilité ----------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

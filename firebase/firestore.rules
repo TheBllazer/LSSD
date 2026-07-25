@@ -1,0 +1,366 @@
+rules_version = '2';
+
+// ============================================================================
+//  LSSD RMS — Règles de sécurité Firestore
+//  Modèle : authentification obligatoire + document d'autorité /permissions/{uid}
+//  Toute écriture est validée : champs d'audit, immutabilité, soft delete.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------------- helpers
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    // Document d'autorité — volontairement minuscule (lu par presque chaque règle).
+    function perms() {
+      return get(/databases/$(database)/documents/permissions/$(uid())).data;
+    }
+
+    function isActiveAgent() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/permissions/$(uid()))
+        && perms().disabled != true;
+    }
+
+    // `abilities` = liste effective compilée (rôle + grants − revokes).
+    function can(ability) {
+      return isActiveAgent() && ability in perms().abilities;
+    }
+
+    function level() {
+      return isActiveAgent() ? perms().level : 0;
+    }
+
+    function isAdmin() {
+      return isActiveAgent() && perms().role == 'ADMINISTRATOR';
+    }
+
+    // ------------------------------------------------------- validation commune
+
+    function hasCreateAudit() {
+      return request.resource.data.createdBy == uid()
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedBy == uid()
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    function hasUpdateAudit() {
+      return request.resource.data.updatedBy == uid()
+        && request.resource.data.updatedAt == request.time
+        // createdAt / createdBy sont immuables
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdBy == resource.data.createdBy;
+    }
+
+    // Empêche la modification d'un champ donné.
+    function unchanged(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // Soft delete = mise à jour de deletedAt (jamais de delete physique).
+    function isSoftDelete() {
+      return changedKeys().hasOnly(['deletedAt', 'updatedAt', 'updatedBy'])
+        && request.resource.data.deletedAt != null;
+    }
+
+    // ------------------------------------------------------------- /permissions
+    // Le cœur du système : personne ne modifie ses propres droits.
+
+    match /permissions/{targetUid} {
+      allow read:   if isSignedIn() && (targetUid == uid() || can('agents.read'));
+      allow create, update: if can('admin.permissions')
+                            && targetUid != uid()
+                            && request.resource.data.level <= level();
+      allow delete: if isAdmin() && targetUid != uid();
+    }
+
+    // ------------------------------------------------------------------ /agents
+
+    match /agents/{targetUid} {
+      allow read: if isActiveAgent();
+
+      // Création d'un compte agent : réservée à agents.create.
+      allow create: if can('agents.create') && hasCreateAudit();
+
+      // Un agent peut mettre à jour son propre profil (champs non sensibles).
+      allow update: if hasUpdateAudit() && (
+        can('agents.update')
+        || (targetUid == uid()
+            && changedKeys().hasOnly(['phone', 'photoUrl', 'callsign',
+                                      'updatedAt', 'updatedBy', 'lastLoginAt',
+                                      'loginCount']))
+      );
+
+      allow delete: if false; // soft delete uniquement via update
+
+      match /activity/{activityId} {
+        allow read:   if can('agents.read');
+        allow create: if isActiveAgent() && request.resource.data.uid == uid();
+        allow update, delete: if false;
+      }
+
+      match /favorites/{favoriteId} {
+        allow read, write: if isActiveAgent() && targetUid == uid();
+      }
+
+      match /recentSearches/{searchId} {
+        allow read, write: if isActiveAgent() && targetUid == uid();
+      }
+    }
+
+    // ---------------------------------------------------------------- /citizens
+
+    function validCitizen() {
+      return request.resource.data.firstName is string
+        && request.resource.data.firstName.size() > 0
+        && request.resource.data.firstName.size() <= 60
+        && request.resource.data.lastName is string
+        && request.resource.data.lastName.size() > 0
+        && request.resource.data.lastName.size() <= 60
+        && request.resource.data.searchTokens is list
+        && request.resource.data.searchTokens.size() <= 80;
+    }
+
+    match /citizens/{citizenId} {
+      allow read:   if can('citizens.read');
+      allow create: if can('citizens.create') && hasCreateAudit() && validCitizen();
+      allow update: if hasUpdateAudit() && validCitizen()
+                    && (can('citizens.update')
+                        || (isSoftDelete() && can('citizens.delete')));
+      allow delete: if isAdmin();
+
+      match /history/{eventId} {
+        allow read:   if can('citizens.read');
+        allow create: if can('citizens.update') || can('citizens.create');
+        allow update, delete: if isAdmin();     // journal quasi immuable
+      }
+
+      match /photos/{photoId} {
+        allow read:   if can('citizens.read');
+        allow create: if can('citizens.update');
+        allow update: if can('citizens.update');
+        allow delete: if can('citizens.update');
+      }
+
+      match /notes/{noteId} {
+        allow read:   if can('citizens.read');
+        allow create: if can('citizens.update') && request.resource.data.authorUid == uid();
+        allow update, delete: if can('citizens.update')
+                              && resource.data.authorUid == uid() || level() >= 60;
+      }
+    }
+
+    // ---------------------------------------------------------------- /vehicles
+
+    match /vehicles/{vehicleId} {
+      allow read:   if can('vehicles.read');
+      allow create: if can('vehicles.create') && hasCreateAudit()
+                    && request.resource.data.plate is string
+                    && request.resource.data.plate.size() > 0;
+      allow update: if hasUpdateAudit()
+                    && (can('vehicles.update')
+                        || (isSoftDelete() && can('vehicles.delete')));
+      allow delete: if isAdmin();
+
+      match /history/{eventId} {
+        allow read:   if can('vehicles.read');
+        allow create: if can('vehicles.update') || can('vehicles.create');
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // ----------------------------------------------------------------- /weapons
+
+    match /weapons/{weaponId} {
+      allow read:   if can('weapons.read');
+      allow create: if can('weapons.create') && hasCreateAudit()
+                    && request.resource.data.serialNumber is string
+                    && request.resource.data.serialNumber.size() > 0;
+      allow update: if hasUpdateAudit()
+                    && (can('weapons.update')
+                        || (isSoftDelete() && can('weapons.delete')));
+      allow delete: if isAdmin();
+
+      match /history/{eventId} {
+        allow read:   if can('weapons.read');
+        allow create: if can('weapons.update') || can('weapons.create');
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // ----------------------------------------------------------------- /reports
+    // Confidentialité : un rapport CONFIDENTIAL/SEALED exige un niveau élevé.
+
+    function canReadReport() {
+      return can('reports.read') && (
+        resource.data.classification == 'PUBLIC'
+        || resource.data.classification == 'RESTRICTED'
+        || (resource.data.classification == 'CONFIDENTIAL' && level() >= 50)
+        || (resource.data.classification == 'SEALED' && level() >= 70)
+        || resource.data.createdBy == uid()
+      );
+    }
+
+    function isReportAuthor() {
+      return resource.data.createdBy == uid();
+    }
+
+    match /reports/{reportId} {
+      allow read:   if canReadReport();
+      allow create: if can('reports.create') && hasCreateAudit()
+                    && request.resource.data.number is string
+                    && request.resource.data.status in ['DRAFT', 'SUBMITTED'];
+      allow update: if hasUpdateAudit() && (
+        // l'auteur peut éditer tant que le rapport n'est pas approuvé
+        (isReportAuthor() && can('reports.update.own')
+          && resource.data.status in ['DRAFT', 'SUBMITTED', 'REJECTED'])
+        // les gradés peuvent éditer n'importe quel rapport
+        || can('reports.update.any')
+        // validation / rejet : permission dédiée
+        || (can('reports.validate')
+            && changedKeys().hasOnly(['status', 'review', 'updatedAt',
+                                      'updatedBy', 'lockedBy']))
+        || (isSoftDelete() && can('reports.delete'))
+      );
+      allow delete: if isAdmin();
+
+      match /revisions/{revisionId} {
+        allow read:   if canReadReport();
+        allow create: if can('reports.create') || can('reports.update.own')
+                      || can('reports.update.any');
+        allow update: if false;
+        allow delete: if level() >= 60;   // purge des anciennes versions
+      }
+
+      match /attachments/{attachmentId} {
+        allow read:   if can('reports.read');
+        allow create, update, delete: if can('reports.update.own')
+                                      || can('reports.update.any');
+      }
+
+      match /comments/{commentId} {
+        allow read:   if can('reports.read');
+        allow create: if can('reports.read') && request.resource.data.authorUid == uid();
+        allow update, delete: if resource.data.authorUid == uid() || level() >= 60;
+      }
+    }
+
+    // -------------------------------------------------------- /criminalRecords
+
+    match /criminalRecords/{recordId} {
+      allow read:   if can('records.read');
+      allow create: if can('records.create') && hasCreateAudit()
+                    && request.resource.data.citizenId is string;
+      allow update: if hasUpdateAudit()
+                    && (can('records.update')
+                        || (isSoftDelete() && can('records.delete')))
+                    && unchanged('citizenId');   // un casier ne change pas de titulaire
+      allow delete: if isAdmin();
+
+      match /comments/{commentId} {
+        allow read:   if can('records.read');
+        allow create: if can('records.read') && request.resource.data.authorUid == uid();
+        allow update, delete: if resource.data.authorUid == uid() || level() >= 60;
+      }
+    }
+
+    // ------------------------------------------------------------- /mapFeatures
+
+    match /mapFeatures/{featureId} {
+      allow read: if can('map.read') && (
+        resource.data.visibility == 'ALL'
+        || resource.data.createdBy == uid()
+        || (resource.data.visibility == 'DIVISION' && level() >= 30)
+      );
+      allow create: if can('map.create') && hasCreateAudit();
+      allow update: if hasUpdateAudit()
+                    && (can('map.update') || resource.data.createdBy == uid());
+      allow delete: if can('map.delete') || (isActiveAgent() && resource.data.createdBy == uid());
+    }
+
+    // ------------------------------------------------------------- /searchIndex
+
+    match /searchIndex/{entityKey} {
+      allow read:  if isActiveAgent();
+      // Écrit systématiquement dans le même batch que l'entité source.
+      allow write: if can('citizens.create') || can('citizens.update')
+                   || can('vehicles.update') || can('weapons.update')
+                   || can('reports.update.own') || can('records.update')
+                   || can('agents.update') || can('map.update');
+    }
+
+    // --------------------------------------------------------------- /auditLogs
+    // Journal strictement immuable : création + lecture uniquement.
+
+    match /auditLogs/{logId} {
+      allow read:   if can('admin.audit') || level() >= 60;
+      allow create: if isActiveAgent()
+                    && request.resource.data.actorUid == uid()
+                    && request.resource.data.at == request.time;
+      allow update, delete: if false;
+    }
+
+    // ---------------------------------------------------------------- /presence
+
+    match /presence/{targetUid} {
+      allow read:  if isActiveAgent();
+      allow write: if isActiveAgent() && targetUid == uid();
+    }
+
+    // ----------------------------------------------------------- /notifications
+
+    match /notifications/{notificationId} {
+      allow read:   if isActiveAgent();
+      allow create: if isActiveAgent();
+      // Marquer comme lu : seul readBy peut changer.
+      allow update: if isActiveAgent()
+                    && changedKeys().hasOnly(['readBy'])
+                    && request.resource.data.readBy.hasAll(resource.data.readBy);
+      allow delete: if level() >= 60;
+    }
+
+    // --------------------------------------------------------------- /counters
+
+    match /counters/{counterId} {
+      allow read:  if isActiveAgent();
+      // Incrément strict de 1, via runTransaction.
+      allow write: if isActiveAgent()
+                   && request.resource.data.value is int
+                   && (!exists(/databases/$(database)/documents/counters/$(counterId))
+                       || request.resource.data.value == resource.data.value + 1
+                       || request.resource.data.year != resource.data.year);
+    }
+
+    // ------------------------------------------------------------------ /stats
+
+    match /stats/{docId} {
+      allow read:  if isActiveAgent();
+      allow write: if isActiveAgent();   // incréments atomiques dans les batches métier
+    }
+
+    // --------------------------------------------------------------- /settings
+
+    match /settings/{docId} {
+      allow read:  if isActiveAgent();
+      allow write: if can('admin.settings');
+    }
+
+    // ------------------------------------------------------------ refus global
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

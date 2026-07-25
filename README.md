@@ -1,0 +1,166 @@
+# LSSD RMS
+
+**Los Santos Sheriff's Department — Records Management System**
+
+Application web de gestion des dossiers du LSSD pour serveur GTA V RP (FiveM),
+conçue à l'image des logiciels réellement utilisés par les *Sheriff's Offices*
+américains (Spillman Flex, Motorola PremierOne, CentralSquare).
+
+Front statique **React 19 + Vite**, données et authentification **Firebase**,
+hébergement **GitHub Pages**. Aucun serveur applicatif.
+
+---
+
+## Sommaire
+
+| Document | Contenu |
+|---|---|
+| [docs/01-ARCHITECTURE.md](docs/01-ARCHITECTURE.md) | Architecture, arborescence, flux de données, contraintes Pages |
+| [docs/02-FIRESTORE-SCHEMA.md](docs/02-FIRESTORE-SCHEMA.md) | Collections, documents, index, relations |
+| [docs/03-WIREFRAMES.md](docs/03-WIREFRAMES.md) | Wireframes textuels de chaque écran |
+| [docs/04-COMPONENTS.md](docs/04-COMPONENTS.md) | Inventaire des composants et des hooks |
+| [docs/05-SECURITY-RULES.md](docs/05-SECURITY-RULES.md) | Rôles, permissions, règles Firestore |
+| [docs/06-ROADMAP.md](docs/06-ROADMAP.md) | Plan de développement par phases |
+
+---
+
+## Démarrage
+
+### 1. Prérequis
+
+- Node.js **≥ 20.19**
+- Un projet Firebase avec **Firestore** et **Authentication (e-mail/mot de passe)** activés
+
+### 2. Installation
+
+```bash
+npm install
+```
+
+### 3. Configuration
+
+```bash
+cp .env.example .env.local
+```
+
+Renseignez les valeurs `VITE_FIREBASE_*` (Console Firebase → Paramètres du
+projet → Vos applications → Web). Sans configuration valide, l'application
+affiche un écran d'instructions au lieu de démarrer.
+
+> La clé API Firebase d'une application web est **publique par conception** :
+> elle est incluse dans le bundle. La sécurité repose sur les règles Firestore
+> et App Check, pas sur le secret de cette clé.
+
+### 4. Développement
+
+```bash
+npm run dev
+```
+
+Le terminal est servi sur `http://localhost:5173/LSSD/`.
+
+### 5. Vérifications
+
+```bash
+npm run lint
+```
+
+```bash
+npm run build
+```
+
+---
+
+## Déploiement des règles Firestore
+
+Les règles et les index sont versionnés dans `firebase/`.
+
+```bash
+npm run rules:deploy
+```
+
+Émulateurs locaux (Firestore + Auth + interface sur `localhost:4000`) :
+
+```bash
+npm run emulators
+```
+
+Passez `VITE_USE_EMULATORS=1` dans `.env.local` pour brancher l'application
+dessus.
+
+---
+
+## Déploiement GitHub Pages
+
+Le workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+construit et publie automatiquement à chaque push sur `main`.
+
+1. **Settings → Pages → Source : GitHub Actions**
+2. **Settings → Secrets and variables → Actions**, ajouter :
+   `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`,
+   `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`,
+   `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`,
+   et éventuellement `VITE_RECAPTCHA_SITE_KEY`.
+3. **Console Firebase → Authentication → Settings → Authorized domains** :
+   ajouter `<utilisateur>.github.io`.
+
+Le chemin de base est déduit du nom du dépôt (`/LSSD/`). Pour un domaine
+personnalisé, définissez `VITE_BASE_PATH=/`.
+
+Le routage utilise `HashRouter` (`/LSSD/#/citizens/…`) : c'est le seul moyen
+fiable d'obtenir des liens directs et un rafraîchissement fonctionnel sur un
+hébergement statique sans réécriture d'URL.
+
+---
+
+## Structure du code
+
+```
+src/
+├─ app/          Composition : providers, routeur, configuration
+├─ firebase/     Seule couche autorisée à importer le SDK Firebase
+├─ services/     Accès données (sans React, testable)
+├─ hooks/        data/ (TanStack Query) · ui/ · auth/
+├─ contexts/     Session, espace de travail, menus, confirmations
+├─ layouts/      AuthLayout, AppShell, ModuleLayout, RecordLayout
+├─ components/   system/ data/ form/ feedback/ media/ navigation/
+│                search/ editor/ map/ pdf/
+├─ modules/      Une fonctionnalité = un dossier autonome
+├─ pdf/          Moteur et modèles de documents officiels
+├─ utils/        Formatage, dates, permissions, tokens de recherche
+└─ styles/       Thème MUI, jetons CSS, styles globaux
+```
+
+**Règle d'or** : un composant ne parle jamais directement à Firebase.
+Le chemin est toujours `composant → hook → service → firebase/`.
+
+---
+
+## État d'avancement
+
+| Phase | Périmètre | État |
+|---|---|---|
+| 0 | Socle : build, thème, chrome applicatif, routage, CI | ✅ livrée |
+| 1 | Authentification et permissions | ⏳ |
+| 2 | Socle de données et composants transverses | ⏳ |
+| 3 | Registre des citoyens | ⏳ |
+| 4 | Registres véhicules et armes | ⏳ |
+| 5 | Rapports et éditeur TipTap | ⏳ |
+| 6 | Casiers judiciaires | ⏳ |
+| 7 | Export PDF | ⏳ |
+| 8 | Carte interactive (SIG) | ⏳ |
+| 9 | Agents et administration | ⏳ |
+| 10 | Tableau de bord, recherche globale, finitions | ⏳ |
+
+Détail et critères d'acceptation : [docs/06-ROADMAP.md](docs/06-ROADMAP.md).
+
+---
+
+## Raccourcis clavier
+
+| Combinaison | Action |
+|---|---|
+| `Ctrl` + `B` | Replier / déplier la barre latérale |
+| `Ctrl` + `1…9` | Accès direct à un module |
+| `Ctrl` + `K` | Recherche globale *(phase 10)* |
+| `Ctrl` + `S` | Enregistrer la fiche courante *(phase 3)* |

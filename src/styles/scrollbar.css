@@ -1,0 +1,57 @@
+/* ==========================================================================
+   LSSD RMS — Barres de défilement personnalisées
+   Aspect « logiciel métier » : piste sombre, poignée acier, accent au survol.
+   ========================================================================== */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--steel-600) var(--navy-850);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--navy-850);
+  border-left: 1px solid var(--line-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--steel-600);
+  border: 2px solid var(--navy-850);
+  border-radius: 6px;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--steel-400);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--accent-dim);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--navy-850);
+}
+
+/* Zones compactes (panneaux latéraux, listes de résultats) */
+.scroll-compact::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scroll-compact::-webkit-scrollbar-thumb {
+  border-width: 1px;
+}
+
+/* Défilement masqué mais actif (barres d'onglets) */
+.scroll-hidden {
+  scrollbar-width: none;
+}
+
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
+}

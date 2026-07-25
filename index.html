@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1280" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta
+      name="description"
+      content="Los Santos Sheriff's Department — Records Management System. Système à accès restreint."
+    />
+    <link rel="icon" type="image/svg+xml" href="./brand/lssd-star.svg" />
+    <title>LSSD RMS — Records Management System</title>
+
+    <!-- Écran d'amorçage affiché avant l'hydratation de React (aucun flash blanc). -->
+    <style>
+      html,
+      body,
+      #root {
+        height: 100%;
+        margin: 0;
+        background: #0a0f1a;
+        color: #e6edf7;
+        font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+      }
+
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        letter-spacing: 0.18em;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #8a9ab4;
+        z-index: 9999;
+        transition: opacity 220ms ease;
+      }
+
+      #boot.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #boot .bar {
+        width: 240px;
+        height: 2px;
+        background: #142033;
+        overflow: hidden;
+      }
+
+      #boot .bar span {
+        display: block;
+        width: 40%;
+        height: 100%;
+        background: #2d7dd2;
+        animation: boot-scan 1.1s ease-in-out infinite;
+      }
+
+      @keyframes boot-scan {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(350%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <div id="boot">
+      <div>Los Santos Sheriff's Department</div>
+      <div class="bar"><span></span></div>
+      <div>Initialisation du terminal</div>
+    </div>
+
+    <noscript>
+      <div style="padding: 32px; font-family: sans-serif">
+        JavaScript est requis pour accéder au système LSSD RMS.
+      </div>
+    </noscript>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

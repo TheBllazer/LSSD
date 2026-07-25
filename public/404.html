@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>LSSD RMS — Redirection</title>
+    <style>
+      body {
+        background: #0a0f1a;
+        color: #8a9ab4;
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+    </style>
+    <script>
+      /**
+       * Filet de sécurité GitHub Pages.
+       *
+       * L'application utilise HashRouter : les routes réelles vivent après le
+       * "#" et ne provoquent jamais de 404. Ce fichier ne sert donc que pour
+       * les liens hérités du type /LSSD/citizens/abc (chemin réel) : on les
+       * reconvertit en /LSSD/#/citizens/abc avant de rendre la main à l'app.
+       */
+      (function redirectToHashRoute() {
+        var segments = window.location.pathname.split('/').filter(Boolean);
+        // Le premier segment est le nom du dépôt (base GitHub Pages).
+        var base = segments.length ? '/' + segments[0] + '/' : '/';
+        var route = '/' + segments.slice(1).join('/');
+        var target = base + '#' + route + window.location.search;
+        window.location.replace(target);
+      })();
+    </script>
+  </head>
+  <body>
+    Redirection vers le terminal LSSD…
+  </body>
+</html>

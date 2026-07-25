@@ -1,0 +1,31 @@
+# Dépendances
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+*.local
+
+# Environnement — ne jamais committer les clés du projet
+.env
+.env.local
+.env.*.local
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Éditeurs / OS
+.vscode/*
+!.vscode/extensions.json
+.claude/settings.local.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*

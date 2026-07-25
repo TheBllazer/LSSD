@@ -1,0 +1,12 @@
+# Normalisation des fins de ligne : LF dans le dépôt, quelle que soit la plateforme.
+* text=auto eol=lf
+
+# Fichiers binaires
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Fichiers générés : exclus des statistiques de langage et des diffs
+package-lock.json linguist-generated=true -diff

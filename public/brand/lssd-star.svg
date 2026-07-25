@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Étoile du Los Santos Sheriff's Department">
+  <title>LSSD</title>
+  <defs>
+    <linearGradient id="star-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8CB63" />
+      <stop offset="45%" stop-color="#C9A227" />
+      <stop offset="100%" stop-color="#8C6F14" />
+    </linearGradient>
+    <linearGradient id="star-core" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#16243A" />
+      <stop offset="100%" stop-color="#0A0F1A" />
+    </linearGradient>
+  </defs>
+
+  <!-- Étoile à sept branches (standard des shérifs de Californie) -->
+  <g fill="url(#star-gold)" stroke="#6B540F" stroke-width="1" stroke-linejoin="round">
+    <path d="M50 4 L59.55 30.18 L85.96 21.32 L71.45 45.11 L94.85 60.24 L67.20 63.72
+             L69.96 91.44 L50 72 L30.04 91.44 L32.80 63.72 L5.15 60.24 L28.55 45.11
+             L14.04 21.32 L40.45 30.18 Z" />
+    <!-- Billes aux pointes -->
+    <circle cx="50" cy="4" r="4.4" />
+    <circle cx="85.96" cy="21.32" r="4.4" />
+    <circle cx="94.85" cy="60.24" r="4.4" />
+    <circle cx="69.96" cy="91.44" r="4.4" />
+    <circle cx="30.04" cy="91.44" r="4.4" />
+    <circle cx="5.15" cy="60.24" r="4.4" />
+    <circle cx="14.04" cy="21.32" r="4.4" />
+  </g>
+
+  <!-- Médaillon central -->
+  <circle cx="50" cy="50" r="20" fill="url(#star-core)" stroke="#C9A227" stroke-width="2" />
+  <circle cx="50" cy="50" r="16" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.55" />
+  <text x="50" y="47.5" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="12.5" font-weight="700" letter-spacing="0.6" fill="#E8CB63">LSSD</text>
+  <text x="50" y="58" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="5.2" letter-spacing="1.1" fill="#C9A227">SHERIFF</text>
+</svg>

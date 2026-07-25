@@ -1,0 +1,97 @@
+/* ==========================================================================
+   LSSD RMS — Jetons de design
+   Source unique de vérité des couleurs, espacements et dimensions du chrome.
+   Le thème MUI (src/styles/theme.js) consomme les MÊMES valeurs : ne jamais
+   redéfinir une couleur ailleurs dans l'application.
+   ========================================================================== */
+
+:root {
+  /* --- Fonds (bleu nuit → noir) ------------------------------------------ */
+  --navy-950: #060a12;
+  --navy-900: #0a0f1a;
+  --navy-850: #0c1320;
+  --navy-800: #0e1626;
+  --navy-750: #111b2d;
+  --navy-700: #142033;
+  --steel-600: #1e2c42;
+  --steel-500: #27374f;
+  --steel-400: #33465f;
+
+  /* --- Bordures / séparateurs ------------------------------------------- */
+  --line: #22314a;
+  --line-strong: #2d405e;
+  --line-soft: #1a2639;
+
+  /* --- Texte ------------------------------------------------------------- */
+  --text: #e6edf7;
+  --text-strong: #ffffff;
+  --muted: #8a9ab4;
+  --muted-dim: #63738d;
+  --disabled: #4a5a71;
+
+  /* --- Accents ----------------------------------------------------------- */
+  --accent: #2d7dd2;
+  --accent-hover: #3d8fe5;
+  --accent-dim: #1c5a9c;
+  --accent-glow: rgba(45, 125, 210, 0.18);
+  --gold: #c9a227;
+  --gold-dim: #8c6f14;
+
+  /* --- Sémantique -------------------------------------------------------- */
+  --ok: #1e8e5a;
+  --ok-dim: rgba(30, 142, 90, 0.16);
+  --warn: #d68910;
+  --warn-dim: rgba(214, 137, 16, 0.16);
+  --danger: #c0392b;
+  --danger-dim: rgba(192, 57, 43, 0.16);
+  --info: #2d7dd2;
+  --info-dim: rgba(45, 125, 210, 0.16);
+
+  /* --- Statuts métier ---------------------------------------------------- */
+  --status-clear: #1e8e5a;
+  --status-wanted: #c0392b;
+  --status-incarcerated: #7d3c98;
+  --status-probation: #d68910;
+  --status-deceased: #63738d;
+  --status-missing: #2d7dd2;
+
+  /* --- Dimensions du chrome --------------------------------------------- */
+  --navbar-h: 48px;
+  --tabbar-h: 34px;
+  --statusbar-h: 26px;
+  --sidebar-w: 236px;
+  --sidebar-w-collapsed: 56px;
+  --header-h: 52px;
+
+  /* --- Rayons ------------------------------------------------------------ */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+
+  /* --- Ombres (discrètes, style logiciel) -------------------------------- */
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.03), 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-window: 0 18px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--line-strong);
+  --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--line-strong);
+
+  /* --- Typographie ------------------------------------------------------- */
+  --font-ui: 'Segoe UI', Inter, -apple-system, 'Helvetica Neue', sans-serif;
+  --font-mono: 'Cascadia Mono', 'Consolas', 'Roboto Mono', ui-monospace, monospace;
+  --font-doc: Georgia, 'Times New Roman', serif;
+
+  /* --- Durées d'animation (discrètes) ------------------------------------ */
+  --dur-instant: 90ms;
+  --dur-fast: 140ms;
+  --dur-base: 180ms;
+  --dur-slow: 260ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Plans (z-index) --------------------------------------------------- */
+  --z-sidebar: 20;
+  --z-navbar: 30;
+  --z-context-menu: 1400;
+  --z-modal: 1300;
+  --z-palette: 1500;
+  --z-toast: 1600;
+}
