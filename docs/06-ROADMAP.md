@@ -164,7 +164,7 @@ parcours complet sans rechargement de page, aucun avertissement console.
 |---|---|---|
 | 0 | Socle exécutable | ✅ livrée — `lint` et `build` verts, terminal fonctionnel |
 | 1 | Auth & permissions | ✅ livrée — reste à activer Authentication côté console Firebase |
-| 2 | Socle données & UI | ⏳ |
+| 2 | Socle données & UI | ✅ livrée — `npm run check` couvre tokens et permissions |
 | 3 | Citoyens | ⏳ |
 | 4 | Véhicules & Armes | ⏳ |
 | 5 | Rapports & éditeur | ⏳ |

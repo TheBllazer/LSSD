@@ -10,6 +10,7 @@ import {
 } from 'react-icons/md';
 import Navbar from '@/components/navigation/Navbar';
 import Sidebar from '@/components/navigation/Sidebar';
+import TabBar from '@/components/navigation/TabBar';
 import { StatusBar, StatusItem, StatusSpacer } from '@/components/system';
 import ErrorBoundary from '@/components/feedback/ErrorBoundary';
 import ModuleSkeleton from '@/components/feedback/ModuleSkeleton';
@@ -17,6 +18,7 @@ import useLocalStorage from '@/hooks/ui/useLocalStorage';
 import useHotkeys from '@/hooks/ui/useHotkeys';
 import useClock from '@/hooks/ui/useClock';
 import useAuth from '@/hooks/auth/useAuth';
+import useWorkspace from '@/hooks/ui/useWorkspace';
 import useOnlineAgents from '@/hooks/data/useOnlineAgents';
 import { ALL_NAV } from '@/app/config/navigation';
 import { STORAGE_KEYS } from '@/app/config/constants';
@@ -35,6 +37,7 @@ export default function AppShell() {
   const navigate = useNavigate();
   const clock = useClock();
   const { agent, role, abilities } = useAuth();
+  const { tabs, activeKey, closeTab } = useWorkspace();
   const { count: onlineCount } = useOnlineAgents();
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage(
     STORAGE_KEYS.SIDEBAR_COLLAPSED,
@@ -43,12 +46,16 @@ export default function AppShell() {
 
   /**
    * Ctrl+B : repli de la barre latérale.
+   * Ctrl+W : fermeture de l'onglet courant.
    * Ctrl+1..9 : accès direct à un module — uniquement ceux auxquels l'agent a
    * droit, sinon le raccourci mènerait à un écran « accès refusé ».
    */
   const hotkeys = useMemo(() => {
     const bindings = {
       'ctrl+b': () => setSidebarCollapsed((value) => !value),
+      'ctrl+w': () => {
+        if (activeKey) closeTab(activeKey);
+      },
     };
     for (const item of ALL_NAV) {
       if (!item.shortcut) continue;
@@ -56,7 +63,7 @@ export default function AppShell() {
       bindings[`ctrl+${item.shortcut}`] = () => navigate(item.path);
     }
     return bindings;
-  }, [navigate, setSidebarCollapsed, abilities]);
+  }, [navigate, setSidebarCollapsed, abilities, activeKey, closeTab]);
 
   useHotkeys(hotkeys);
 
@@ -80,8 +87,12 @@ export default function AppShell() {
             flexDirection: 'column',
             bgcolor: 'background.default',
             overflow: 'hidden',
+            position: 'relative',
           }}
         >
+          {/* La barre d'onglets n'apparaît qu'une fois une fiche ouverte. */}
+          {tabs.length > 0 && <TabBar />}
+
           {/*
             Une frontière d'erreur par zone de contenu : la défaillance d'un
             module n'emporte jamais le chrome ni la session.

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Navigate } from 'react-router-dom';
 import AppShell from '@/layouts/AppShell';
+import WorkspaceProvider from '@/contexts/WorkspaceProvider';
 import ProtectedRoute from './ProtectedRoute';
 import RoleRoute from './RoleRoute';
 import BootSplash from '@/components/feedback/BootSplash';
@@ -55,7 +56,10 @@ export const routes = [
     path: ROUTES.ROOT,
     element: (
       <ProtectedRoute>
-        <AppShell />
+        {/* L'espace de travail vit dans le routeur : ouvrir un onglet navigue. */}
+        <WorkspaceProvider>
+          <AppShell />
+        </WorkspaceProvider>
       </ProtectedRoute>
     ),
     children: [

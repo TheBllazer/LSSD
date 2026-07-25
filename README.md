@@ -72,8 +72,17 @@ npm run lint
 ```
 
 ```bash
+npm run check
+```
+
+```bash
 npm run build
 ```
+
+`npm run check` exécute les contrôles de non-régression des modules purs
+(tokenisation de recherche, système de permissions) — les deux endroits où une
+régression passerait inaperçue : une recherche qui ne trouve plus rien, ou un
+rôle qui gagne un droit qu'il ne devrait pas avoir.
 
 ---
 
@@ -177,7 +186,7 @@ Le chemin est toujours `composant → hook → service → firebase/`.
 |---|---|---|
 | 0 | Socle : build, thème, chrome applicatif, routage, CI | ✅ livrée |
 | 1 | Authentification et permissions | ✅ livrée |
-| 2 | Socle de données et composants transverses | ⏳ |
+| 2 | Socle de données et composants transverses | ✅ livrée |
 | 3 | Registre des citoyens | ⏳ |
 | 4 | Registres véhicules et armes | ⏳ |
 | 5 | Rapports et éditeur TipTap | ⏳ |
