@@ -43,6 +43,27 @@ service cloud.firestore {
       return isActiveAgent() && perms().role == 'ADMINISTRATOR';
     }
 
+    // ---------------------------------------------------------------- amorçage
+    //
+    // Le tout premier administrateur ne peut être créé ni par l'application
+    // (aucune permission ne préexiste) ni par lui-même une fois le système en
+    // service. On ouvre donc une porte unique, refermée par son propre usage :
+    //
+    //   - elle n'existe que tant que /settings/bootstrap est absent ;
+    //   - l'amorçage crée ce document dans la MÊME transaction ;
+    //   - le document est ensuite immuable et indestructible.
+    //
+    // Une seule personne peut donc l'emprunter, une seule fois, et seulement
+    // pour se déclarer administrateur — pas pour écrire quoi que ce soit d'autre.
+
+    function bootstrapOpen() {
+      return !exists(/databases/$(database)/documents/settings/bootstrap);
+    }
+
+    function isBootstrapping(targetUid) {
+      return isSignedIn() && targetUid == uid() && bootstrapOpen();
+    }
+
     // ------------------------------------------------------- validation commune
 
     function hasCreateAudit() {
@@ -80,9 +101,21 @@ service cloud.firestore {
 
     match /permissions/{targetUid} {
       allow read:   if isSignedIn() && (targetUid == uid() || can('agents.read'));
-      allow create, update: if can('admin.permissions')
-                            && targetUid != uid()
-                            && request.resource.data.level <= level();
+
+      allow create: if (can('admin.permissions')
+                        && targetUid != uid()
+                        && request.resource.data.level <= level())
+                    // Amorçage : uniquement pour soi-même, uniquement en
+                    // administrateur, uniquement tant que la porte est ouverte.
+                    || (isBootstrapping(targetUid)
+                        && request.resource.data.role == 'ADMINISTRATOR'
+                        && request.resource.data.level == 100
+                        && request.resource.data.disabled == false);
+
+      allow update: if can('admin.permissions')
+                    && targetUid != uid()
+                    && request.resource.data.level <= level();
+
       allow delete: if isAdmin() && targetUid != uid();
     }
 
@@ -91,8 +124,10 @@ service cloud.firestore {
     match /agents/{targetUid} {
       allow read: if isActiveAgent();
 
-      // Création d'un compte agent : réservée à agents.create.
-      allow create: if can('agents.create') && hasCreateAudit();
+      // Création d'un compte agent : réservée à agents.create, ou à l'agent
+      // lui-même pendant l'amorçage du système.
+      allow create: if hasCreateAudit()
+                    && (can('agents.create') || isBootstrapping(targetUid));
 
       // Un agent peut mettre à jour son propre profil (champs non sensibles).
       allow update: if hasUpdateAudit() && (
@@ -351,6 +386,16 @@ service cloud.firestore {
     }
 
     // --------------------------------------------------------------- /settings
+
+    // Sentinelle d'amorçage. Lisible par tout compte authentifié — c'est ce
+    // qui permet à l'application de savoir si le système est déjà en service
+    // avant même d'avoir la moindre permission. Créée une fois, jamais modifiée,
+    // jamais supprimée : elle scelle la porte d'amorçage.
+    match /settings/bootstrap {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() && bootstrapOpen();
+      allow update, delete: if false;
+    }
 
     match /settings/{docId} {
       allow read:  if isActiveAgent();

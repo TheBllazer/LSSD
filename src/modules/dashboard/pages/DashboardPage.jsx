@@ -25,6 +25,12 @@ import {
 import { DIVISION_LABELS, RANK_LABELS } from '@/types/agents';
 
 /**
+ * Modules effectivement livrés.
+ * Mis à jour à chaque phase — voir `docs/06-ROADMAP.md`.
+ */
+const DELIVERED_MODULES = new Set(['dashboard', 'citizens']);
+
+/**
  * Ligne d'état d'un sous-système, avec pastille de validité.
  * @param {{ label: string, ok: boolean, value: React.ReactNode }} props
  */
@@ -208,7 +214,7 @@ export default function DashboardPage() {
             {ALL_NAV.map((item) => {
               const Icon = item.icon;
               const permitted = !item.permission || hasAbility(abilities, item.permission);
-              const delivered = item.id === 'dashboard';
+              const delivered = DELIVERED_MODULES.has(item.id);
 
               return (
                 <Stack

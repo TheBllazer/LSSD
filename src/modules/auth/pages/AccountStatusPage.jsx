@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import {
   MdBlock,
@@ -12,6 +12,8 @@ import {
 import AuthLayout from '@/layouts/AuthLayout';
 import useAuth from '@/hooks/auth/useAuth';
 import { AUTH_STATUS } from '@/contexts/authContext';
+import BootstrapPanel from '../components/BootstrapPanel';
+import { isBootstrapOpen } from '@/services/bootstrap.service';
 
 /**
  * Contenu affiché selon l'état anormal de la session.
@@ -57,9 +59,36 @@ export default function AccountStatusPage() {
   const { status, user, error, logout, refresh } = useAuth();
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [bootstrapOpen, setBootstrapOpen] = useState(false);
 
   const variant = VARIANTS[status] ?? VARIANTS[AUTH_STATUS.ERROR];
   const Icon = variant.icon;
+
+  /**
+   * Un compte non provisionné sur une installation neuve peut amorcer le
+   * système. On interroge la sentinelle plutôt que de deviner : c'est le seul
+   * document lisible sans permissions.
+   */
+  useEffect(() => {
+    if (status !== AUTH_STATUS.UNPROVISIONED || !user) return;
+    let cancelled = false;
+
+    isBootstrapOpen().then((state) => {
+      if (!cancelled) setBootstrapOpen(state.open);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, user]);
+
+  if (bootstrapOpen && user) {
+    return (
+      <AuthLayout>
+        <BootstrapPanel user={user} onDone={refresh} />
+      </AuthLayout>
+    );
+  }
 
   const handleLogout = async () => {
     setBusy(true);

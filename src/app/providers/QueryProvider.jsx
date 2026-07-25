@@ -38,7 +38,13 @@ function describeQueryError(error) {
   const code = typeof error === 'object' && error !== null ? error.code : '';
   if (code === 'permission-denied') return "Accès refusé : permissions insuffisantes.";
   if (code === 'unavailable') return 'Service indisponible. Nouvelle tentative en cours…';
-  if (code === 'failed-precondition') return 'Index Firestore manquant pour cette requête.';
+  if (code === 'failed-precondition') {
+    // Firestore emploie le même code pour un index absent et un index en cours
+    // de construction — deux situations très différentes pour l'exploitant.
+    return /currently building/i.test(error?.message ?? '')
+      ? 'Index Firestore en cours de construction. Réessayez dans quelques minutes.'
+      : "Index Firestore manquant pour cette requête (npm run rules:deploy).";
+  }
   return error?.message || 'Erreur inattendue lors de la communication serveur.';
 }
 

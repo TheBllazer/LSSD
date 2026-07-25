@@ -4,7 +4,7 @@ import { MdHistory, MdCircle } from 'react-icons/md';
 import EmptyState from '@/components/data/EmptyState';
 import TableSkeleton from '@/components/data/TableSkeleton';
 import { formatDateTime, formatRelative } from '@/utils/dates';
-import { CITIZEN_EVENT_LABELS } from '@/types/citizens';
+import { CITIZEN_EVENT_LABELS, CITIZEN_FIELD_LABELS } from '@/types/citizens';
 
 /** Couleur de la pastille selon la nature de l'événement. */
 const EVENT_TONES = {
@@ -123,7 +123,7 @@ export default function HistoryTab({ events = [], loading }) {
               </Stack>
 
               <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
-                {event.label}
+                {humanizeLabel(event.label)}
               </Typography>
 
               {/* Détail des champs modifiés, quand l'événement en porte. */}
@@ -145,8 +145,8 @@ export default function HistoryTab({ events = [], loading }) {
                       spacing={0.75}
                       sx={{ fontSize: 11 }}
                     >
-                      <Box className="label-caps" sx={{ minWidth: 120 }}>
-                        {change.field}
+                      <Box className="label-caps" sx={{ minWidth: 130 }}>
+                        {CITIZEN_FIELD_LABELS[change.field] ?? change.field}
                       </Box>
                       <Box sx={{ color: 'text.disabled', textDecoration: 'line-through' }}>
                         {formatValue(change.from)}
@@ -170,6 +170,20 @@ export default function HistoryTab({ events = [], loading }) {
         ))}
       </Box>
     </>
+  );
+}
+
+/**
+ * Traduit les noms de champ techniques présents dans le libellé d'un événement
+ * (« Champ modifié : distinctiveMarks »).
+ *
+ * @param {string} label
+ * @returns {string}
+ */
+function humanizeLabel(label) {
+  if (!label) return '';
+  return label.replace(/Champ modifié : (\w+)/, (match, field) =>
+    CITIZEN_FIELD_LABELS[field] ? `Champ modifié : ${CITIZEN_FIELD_LABELS[field]}` : match,
   );
 }
 

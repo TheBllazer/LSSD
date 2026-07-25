@@ -209,6 +209,39 @@ export const CITIZEN_EVENT_LABELS = {
 };
 
 /**
+ * Libellés des champs d'une fiche citoyen.
+ *
+ * Utilisés par la chronologie : un historique qui affiche « distinctiveMarks »
+ * oblige l'agent à traduire mentalement un nom de champ technique.
+ */
+export const CITIZEN_FIELD_LABELS = {
+  firstName: 'Prénom',
+  lastName: 'Nom',
+  aliases: 'Alias',
+  birthDate: 'Date de naissance',
+  sex: 'Sexe',
+  height: 'Taille',
+  weight: 'Poids',
+  eyeColor: 'Couleur des yeux',
+  hairColor: 'Couleur des cheveux',
+  phone: 'Téléphone',
+  email: 'Adresse e-mail',
+  address: 'Adresse',
+  occupation: 'Profession',
+  employer: 'Employeur',
+  status: 'Statut judiciaire',
+  flags: 'Signalements',
+  licenses: 'Permis',
+  affiliations: 'Affiliations',
+  tattoos: 'Tatouages',
+  description: 'Description',
+  distinctiveMarks: 'Signes particuliers',
+  notes: 'Notes',
+  photoUrl: 'Photographie',
+  deletedAt: 'Archivage',
+};
+
+/**
  * Transforme un dictionnaire de libellés en options de liste déroulante.
  * @param {Record<string, string>} labels
  * @returns {{value: string, label: string}[]}

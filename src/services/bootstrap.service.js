@@ -1,12 +1,8 @@
 import {
   docRef,
-  col,
-  getDocs,
   getDoc,
   setDoc,
   writeBatch,
-  query as fsQuery,
-  limit as fsLimit,
   serverTimestamp,
   requireDb,
 } from '@/firebase/db';
@@ -19,22 +15,23 @@ import { dayjs } from '@/utils/dates';
 /**
  * Amorçage du système.
  *
- * Le RMS n'a pas d'inscription publique : le tout premier administrateur ne
- * peut pas se créer depuis l'application une fois les règles de sécurité
- * déployées — elles exigent un document `/permissions/{uid}` préexistant pour
- * autoriser la moindre écriture.
+ * Problème à résoudre : le RMS n'a pas d'inscription publique, et les règles
+ * de sécurité exigent un document `/permissions/{uid}` préexistant pour
+ * autoriser la moindre écriture. Le tout premier administrateur ne peut donc
+ * se créer ni depuis l'application, ni par lui-même une fois le système en
+ * service.
  *
- * Il reste une fenêtre : tant que les règles ne sont pas publiées, Firestore
- * fonctionne en mode ouvert et le client peut écrire. Ce service exploite cette
- * fenêtre pour provisionner le premier compte, puis **la referme** en invitant
- * à déployer les règles immédiatement.
+ * Solution : une porte unique, refermée par son propre usage. Les règles
+ * autorisent un agent authentifié à se déclarer administrateur **tant que
+ * `/settings/bootstrap` n'existe pas**, et l'amorçage crée ce document dans la
+ * même transaction atomique. Une seule personne peut donc l'emprunter, une
+ * seule fois — et uniquement pour se provisionner, pas pour écrire autre chose.
  *
- * Les écritures sont volontairement séquencées en deux temps : les règles
- * évaluent chaque opération d'un lot contre l'état *antérieur* au lot. Écrire
- * les permissions et les référentiels d'un seul bloc échouerait donc dès que
- * les règles sont actives, alors que la séquence « permissions d'abord,
- * référentiels ensuite » fonctionne dans les deux configurations.
+ * Voir `firebase/firestore.rules`, section « amorçage ».
  */
+
+/** Identifiant du document sentinelle. */
+const SENTINEL = 'bootstrap';
 
 /** Codes pénaux fournis au démarrage — éditables ensuite dans l'administration. */
 const DEFAULT_CHARGE_CODES = [
@@ -44,26 +41,22 @@ const DEFAULT_CHARGE_CODES = [
   { code: 'PC 215', label: 'Vol de véhicule avec violence', type: 'FELONY' },
   { code: 'PC 240', label: 'Tentative de voies de fait', type: 'MISDEMEANOR' },
   { code: 'PC 245', label: 'Agression avec arme mortelle', type: 'FELONY' },
-  { code: 'PC 261', label: 'Agression sexuelle', type: 'FELONY' },
   { code: 'PC 273.5', label: 'Violences domestiques', type: 'FELONY' },
-  { code: 'PC 314', label: 'Exhibition', type: 'MISDEMEANOR' },
-  { code: 'PC 415', label: 'Trouble à l\'ordre public', type: 'MISDEMEANOR' },
+  { code: 'PC 415', label: "Trouble à l'ordre public", type: 'MISDEMEANOR' },
   { code: 'PC 459', label: 'Cambriolage', type: 'FELONY' },
   { code: 'PC 484', label: 'Vol simple', type: 'MISDEMEANOR' },
   { code: 'PC 487', label: 'Vol aggravé', type: 'FELONY' },
   { code: 'PC 496', label: 'Recel', type: 'FELONY' },
   { code: 'PC 594', label: 'Vandalisme', type: 'MISDEMEANOR' },
   { code: 'PC 647(f)', label: 'Ivresse publique', type: 'MISDEMEANOR' },
-  { code: 'PC 664', label: 'Tentative', type: 'MISDEMEANOR' },
   { code: 'PC 69', label: 'Rébellion envers un agent', type: 'FELONY' },
   { code: 'PC 148', label: 'Obstruction à agent', type: 'MISDEMEANOR' },
-  { code: 'PC 12025', label: 'Port d\'arme dissimulée', type: 'FELONY' },
-  { code: 'PC 25400', label: 'Arme dissimulée dans un véhicule', type: 'FELONY' },
+  { code: 'PC 25400', label: "Port d'arme dissimulée", type: 'FELONY' },
   { code: 'HS 11350', label: 'Possession de stupéfiants', type: 'FELONY' },
   { code: 'HS 11351', label: 'Détention en vue de la vente', type: 'FELONY' },
-  { code: 'VC 23152', label: 'Conduite en état d\'ivresse', type: 'MISDEMEANOR' },
+  { code: 'VC 23152', label: "Conduite en état d'ivresse", type: 'MISDEMEANOR' },
   { code: 'VC 22350', label: 'Excès de vitesse', type: 'INFRACTION' },
-  { code: 'VC 2800.2', label: 'Refus d\'obtempérer', type: 'FELONY' },
+  { code: 'VC 2800.2', label: "Refus d'obtempérer", type: 'FELONY' },
   { code: 'VC 20002', label: 'Délit de fuite', type: 'MISDEMEANOR' },
 ];
 
@@ -76,54 +69,49 @@ const DEFAULT_DISTRICTS = [
 ];
 
 /**
- * Indique si le système a déjà été amorcé.
+ * Le système a-t-il déjà été amorcé ?
  *
- * On teste l'existence d'au moins un document dans `/permissions` : c'est la
- * marque d'un système en service. Une erreur de permission signifie que les
- * règles sont déjà déployées — donc que l'amorçage par le client n'est plus
- * possible.
+ * Lit la sentinelle, seul document accessible à un compte sans permissions.
  *
- * @returns {Promise<{ bootstrapped: boolean, rulesActive: boolean, error: string|null }>}
+ * @returns {Promise<{ open: boolean, error: string|null }>}
  */
-export async function inspectBootstrapState() {
+export async function isBootstrapOpen() {
   try {
-    const snapshot = await getDocs(fsQuery(col(COLLECTIONS.PERMISSIONS), fsLimit(1)));
-    return { bootstrapped: !snapshot.empty, rulesActive: false, error: null };
+    const snapshot = await getDoc(docRef(COLLECTIONS.SETTINGS, SENTINEL));
+    return { open: !snapshot.exists(), error: null };
   } catch (error) {
-    if (error?.code === 'permission-denied') {
-      return { bootstrapped: false, rulesActive: true, error: null };
-    }
+    // Un refus ici signifie que les règles d'amorçage ne sont pas déployées.
     return {
-      bootstrapped: false,
-      rulesActive: false,
-      error: error?.message ?? 'Lecture impossible.',
+      open: false,
+      error:
+        error?.code === 'permission-denied'
+          ? "Les règles d'amorçage ne sont pas déployées sur ce projet Firebase."
+          : (error?.message ?? 'Lecture impossible.'),
     };
   }
 }
 
 /**
- * Provisionne le premier administrateur.
+ * Provisionne le premier administrateur et scelle la porte d'amorçage.
+ *
+ * Les trois écritures partent dans un lot unique : les règles évaluent chaque
+ * opération contre l'état *antérieur* au lot, si bien que la sentinelle peut
+ * être créée en même temps que les permissions qu'elle autorise. Soit tout
+ * réussit, soit rien n'est écrit — aucun état intermédiaire où la porte
+ * resterait ouverte.
  *
  * @param {object} params
- * @param {import('firebase/auth').User} params.user Compte Firebase authentifié
+ * @param {import('firebase/auth').User} params.user
  * @param {object} params.profile Champs de la fiche agent saisis à l'écran
  * @returns {Promise<void>}
  */
 export async function provisionFirstAdministrator({ user, profile }) {
-  // Garde-fou : on ne provisionne que si le système est vierge. Sans cela,
-  // laisser cette route accessible reviendrait à offrir les pleins pouvoirs.
-  const state = await inspectBootstrapState();
-  if (state.bootstrapped) {
+  const state = await isBootstrapOpen();
+  if (!state.open) {
     throw new Error(
-      'Le système est déjà amorcé : un compte administrateur existe. ' +
-        "Utilisez le module Agents pour créer d'autres comptes.",
-    );
-  }
-  if (state.rulesActive) {
-    throw new Error(
-      'Les règles de sécurité sont déjà déployées : la création du premier ' +
-        'compte doit se faire depuis la console Firebase ' +
-        '(voir firebase/seed/bootstrap-admin.md).',
+      state.error ??
+        'Le système est déjà amorcé : un administrateur existe. Faites-vous ' +
+          'provisionner par un officier disposant des droits d\'administration.',
     );
   }
 
@@ -143,7 +131,7 @@ export async function provisionFirstAdministrator({ user, profile }) {
     status: AGENT_STATUS.ACTIVE,
     certifications: [],
     supervisorId: null,
-    notes: 'Compte administrateur initial, créé lors de l\'amorçage du système.',
+    notes: "Compte administrateur initial, créé lors de l'amorçage du système.",
     loginCount: 0,
     lastLoginAt: null,
     deletedAt: null,
@@ -159,28 +147,34 @@ export async function provisionFirstAdministrator({ user, profile }) {
     updatedBy: user.uid,
   };
 
-  // Étape 1 — habilitations et fiche agent.
-  const identity = writeBatch(requireDb());
-  identity.set(
+  const batch = writeBatch(requireDb());
+
+  batch.set(
     docRef(COLLECTIONS.PERMISSIONS, user.uid),
     buildPermissionDocument({ role: ROLES.ADMINISTRATOR }),
   );
-  identity.set(docRef(COLLECTIONS.AGENTS, user.uid), agent);
-  await identity.commit();
+  batch.set(docRef(COLLECTIONS.AGENTS, user.uid), agent);
 
-  // Étape 2 — référentiels et compteurs. Séparée pour que les règles, si elles
-  // sont déjà actives, évaluent ces écritures avec les permissions de l'étape 1.
-  await seedReferenceData(user.uid);
+  // Scelle la porte. Immuable et indestructible d'après les règles.
+  batch.set(docRef(COLLECTIONS.SETTINGS, SENTINEL), {
+    bootstrappedAt: serverTimestamp(),
+    bootstrappedBy: user.uid,
+    bootstrappedByEmail: user.email,
+  });
+
+  await batch.commit();
 }
 
 /**
- * Crée les documents de référence du système : paramètres, compteurs de
- * numérotation et agrégats du tableau de bord.
+ * Crée les documents de référence : paramètres, compteurs de numérotation et
+ * agrégats du tableau de bord.
  *
- * Idempotent : les documents déjà présents ne sont pas écrasés.
+ * Appelé après le provisionnement, une fois l'agent reconnu administrateur —
+ * ces écritures exigent la permission `admin.settings`. Idempotent : un
+ * document déjà présent n'est pas écrasé.
  *
- * @param {string} uid Agent à l'origine de l'écriture
- * @returns {Promise<string[]>} Documents effectivement créés
+ * @param {string} uid
+ * @returns {Promise<string[]>} Chemins des documents effectivement créés
  */
 export async function seedReferenceData(uid) {
   const created = [];
