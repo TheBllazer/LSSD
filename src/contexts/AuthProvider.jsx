@@ -80,6 +80,9 @@ export default function AuthProvider({ children }) {
       const token = ++loadTokenRef.current;
       setStatus(AUTH_STATUS.LOADING_PROFILE);
       setError(null);
+      // Renseigné avant toute lecture : en cas d'échec, l'écran d'erreur doit
+      // pouvoir indiquer de quel compte il s'agit.
+      setUser(firebaseUser);
 
       try {
         const permissionDoc = await fetchPermissions(firebaseUser.uid);
@@ -135,8 +138,13 @@ export default function AuthProvider({ children }) {
         console.error('[LSSD] Chargement du profil impossible :', loadError);
         setError(
           loadError?.code === 'permission-denied'
-            ? "Votre compte n'est pas autorisé à accéder au système."
-            : 'Impossible de charger votre profil. Vérifiez votre connexion.',
+            ? // Firestore refuse jusqu'à la lecture de son propre document de
+              // permissions : la base est en mode verrouillé, ce qui signifie
+              // presque toujours que les règles du RMS n'ont pas été publiées.
+              "Firestore refuse l'accès à vos habilitations. Les règles de " +
+              'sécurité du RMS ne sont probablement pas déployées ' +
+              '(npm run rules:deploy), ou la base est restée en mode verrouillé.'
+            : 'Impossible de charger votre profil. Vérifiez votre connexion réseau.',
         );
         setStatus(AUTH_STATUS.ERROR);
       }

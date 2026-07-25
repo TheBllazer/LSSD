@@ -12,3 +12,4 @@ export {
 } from './Fields';
 export { default as PhotoUrlField } from './PhotoUrlField';
 export { default as AutoSaveIndicator } from './AutoSaveIndicator';
+export { default as FormWatcher } from './FormWatcher';

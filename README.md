@@ -205,7 +205,7 @@ Le chemin est toujours `composant → hook → service → firebase/`.
 | 0 | Socle : build, thème, chrome applicatif, routage, CI | ✅ livrée |
 | 1 | Authentification et permissions | ✅ livrée |
 | 2 | Socle de données et composants transverses | ✅ livrée |
-| 3 | Registre des citoyens | ⏳ |
+| 3 | Registre des citoyens | ✅ livrée |
 | 4 | Registres véhicules et armes | ⏳ |
 | 5 | Rapports et éditeur TipTap | ⏳ |
 | 6 | Casiers judiciaires | ⏳ |

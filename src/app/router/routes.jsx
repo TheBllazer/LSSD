@@ -23,6 +23,7 @@ import { PERMISSIONS } from '@/utils/permissions';
 const LoginPage = lazy(() => import('@/modules/auth/pages/LoginPage'));
 const DashboardPage = lazy(() => import('@/modules/dashboard/pages/DashboardPage'));
 const CitizenListPage = lazy(() => import('@/modules/citizens/pages/CitizenListPage'));
+const CitizenDetailPage = lazy(() => import('@/modules/citizens/pages/CitizenDetailPage'));
 const VehicleListPage = lazy(() => import('@/modules/vehicles/pages/VehicleListPage'));
 const WeaponListPage = lazy(() => import('@/modules/weapons/pages/WeaponListPage'));
 const ReportListPage = lazy(() => import('@/modules/reports/pages/ReportListPage'));
@@ -66,6 +67,10 @@ export const routes = [
       { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
       { path: 'dashboard', element: <DashboardPage /> },
       { path: 'citizens', element: guarded(PERMISSIONS.CITIZENS_READ, <CitizenListPage />) },
+      {
+        path: 'citizens/:id',
+        element: guarded(PERMISSIONS.CITIZENS_READ, <CitizenDetailPage />),
+      },
       { path: 'vehicles', element: guarded(PERMISSIONS.VEHICLES_READ, <VehicleListPage />) },
       { path: 'weapons', element: guarded(PERMISSIONS.WEAPONS_READ, <WeaponListPage />) },
       { path: 'reports', element: guarded(PERMISSIONS.REPORTS_READ, <ReportListPage />) },

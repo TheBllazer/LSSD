@@ -60,8 +60,24 @@ export default defineConfig(({ mode }) => {
             if (id.includes('firebase') || id.includes('@firebase') || id.includes('re2js')) {
               return 'vendor-firebase';
             }
-            // Satellites de MUI/Emotion : ils évoluent avec MUI, donc ils
-            // partagent son chunk (invalidation de cache cohérente).
+            // Le DataGrid pèse à lui seul autant que le reste de MUI : il doit
+            // rester hors du chunk chargé au démarrage et n'arriver qu'avec le
+            // premier registre ouvert.
+            if (id.includes('x-data-grid')) return 'vendor-datagrid';
+
+            // Validation et formulaires : inutiles tant qu'aucun formulaire
+            // métier n'est affiché (l'écran de connexion n'en dépend pas).
+            if (id.includes('react-hook-form') || id.includes('/zod/')) {
+              return 'vendor-forms';
+            }
+
+            // MUI et son moteur de styles.
+            //
+            // Regroupement explicite plutôt qu'automatique : laissé à Rollup,
+            // le tronc commun de MUI finit hoisté dans le chunk du DataGrid,
+            // que l'entrée se met alors à précharger — soit 200 ko gzip
+            // téléchargés dès l'écran de connexion pour un tableau que
+            // personne n'a encore ouvert.
             if (
               id.includes('@mui') ||
               id.includes('@emotion') ||
@@ -74,6 +90,7 @@ export default defineConfig(({ mode }) => {
             ) {
               return 'vendor-mui';
             }
+
             if (
               id.includes('framer-motion') ||
               id.includes('motion-dom') ||
@@ -90,7 +107,13 @@ export default defineConfig(({ mode }) => {
             ) {
               return 'vendor-react';
             }
-            return 'vendor';
+
+            /*
+             * Tout le reste — dont les composants @mui/material — est laissé à
+             * Rollup, qui place chaque module dans le chunk correspondant à sa
+             * portée réelle : partagé s'il l'est, chargé avec sa route sinon.
+             */
+            return undefined;
           },
         },
       },
