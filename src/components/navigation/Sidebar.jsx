@@ -4,6 +4,8 @@ import { MdChevronLeft, MdChevronRight, MdStar } from 'react-icons/md';
 import { motion } from 'framer-motion';
 import { PRIMARY_NAV, SECONDARY_NAV } from '@/app/config/navigation';
 import { KbdCombo } from '@/components/system';
+import useAuth from '@/hooks/auth/useAuth';
+import { hasAbility } from '@/utils/permissions';
 
 /**
  * Élément de navigation.
@@ -101,16 +103,26 @@ function SidebarItem({ item, collapsed, active }) {
  *
  * L'état replié est détenu par `AppShell` (pour que le raccourci Ctrl+B et le
  * bouton de la barre agissent sur la même source) et persisté en localStorage.
- * En phase 1, le filtrage par permission remplacera l'affichage inconditionnel.
+ *
+ * Les modules dont l'agent n'a pas la permission de lecture ne sont pas
+ * affichés : inutile de proposer une porte qui se refermera.
  *
  * @param {{ collapsed: boolean, onToggle: () => void }} props
  */
 export default function Sidebar({ collapsed, onToggle }) {
   const location = useLocation();
+  const { abilities } = useAuth();
 
   /** Un module est actif si l'URL commence par son chemin. */
   const isActive = (path) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
+
+  /** Filtre les modules selon les habilitations de l'agent. */
+  const allowed = (items) =>
+    items.filter((item) => !item.permission || hasAbility(abilities, item.permission));
+
+  const primaryItems = allowed(PRIMARY_NAV);
+  const secondaryItems = allowed(SECONDARY_NAV);
 
   return (
     <Box
@@ -137,7 +149,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         )}
 
         <Stack>
-          {PRIMARY_NAV.map((item) => (
+          {primaryItems.map((item) => (
             <SidebarItem
               key={item.id}
               item={item}
@@ -165,18 +177,21 @@ export default function Sidebar({ collapsed, onToggle }) {
           </Typography>
         )}
 
-        <Divider sx={{ my: 1 }} />
-
-        <Stack>
-          {SECONDARY_NAV.map((item) => (
-            <SidebarItem
-              key={item.id}
-              item={item}
-              collapsed={collapsed}
-              active={isActive(item.path)}
-            />
-          ))}
-        </Stack>
+        {secondaryItems.length > 0 && (
+          <>
+            <Divider sx={{ my: 1 }} />
+            <Stack>
+              {secondaryItems.map((item) => (
+                <SidebarItem
+                  key={item.id}
+                  item={item}
+                  collapsed={collapsed}
+                  active={isActive(item.path)}
+                />
+              ))}
+            </Stack>
+          </>
+        )}
       </Box>
 
       <Stack

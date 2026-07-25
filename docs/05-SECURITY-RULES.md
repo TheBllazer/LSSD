@@ -43,7 +43,7 @@
 | citizens | LCUD | LCUD | LCUD | LCU D | LCU | LCU | LCU | L |
 | vehicles | LCUD | LCUD | LCUD | LCU D | LCU | LCU | LCU | L |
 | weapons | LCUD | LCUD | LCUD | LCU D | LCU | LCU | LCU | L |
-| reports (own) | LCU | LCU | LCU | LCU | LCU | LCU | LCU | LC |
+| reports (own) | LCU | LCU | LCU | LCU | LCU | LCU | LCU | LCU |
 | reports (any) | U D | U D | U D | U | U | — | — | — |
 | reports.validate | ✔ | ✔ | ✔ | ✔ | ✔ | — | — | — |
 | reports SEALED | ✔ | ✔ | ✔ | ✔ | — | — | — | — |

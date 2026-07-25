@@ -47,6 +47,12 @@ Renseignez les valeurs `VITE_FIREBASE_*` (Console Firebase → Paramètres du
 projet → Vos applications → Web). Sans configuration valide, l'application
 affiche un écran d'instructions au lieu de démarrer.
 
+Il faut ensuite **provisionner le premier compte administrateur** : la
+procédure complète est décrite dans
+[`firebase/seed/bootstrap-admin.md`](firebase/seed/bootstrap-admin.md).
+Sans elle, aucune connexion n'est possible — l'application n'a pas
+d'inscription publique.
+
 > La clé API Firebase d'une application web est **publique par conception** :
 > elle est incluse dans le bundle. La sécurité repose sur les règles Firestore
 > et App Check, pas sur le secret de cette clé.
@@ -170,7 +176,7 @@ Le chemin est toujours `composant → hook → service → firebase/`.
 | Phase | Périmètre | État |
 |---|---|---|
 | 0 | Socle : build, thème, chrome applicatif, routage, CI | ✅ livrée |
-| 1 | Authentification et permissions | ⏳ |
+| 1 | Authentification et permissions | ✅ livrée |
 | 2 | Socle de données et composants transverses | ⏳ |
 | 3 | Registre des citoyens | ⏳ |
 | 4 | Registres véhicules et armes | ⏳ |

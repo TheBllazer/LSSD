@@ -54,9 +54,33 @@ export default defineConfig(({ mode }) => {
             if (id.includes('@tiptap') || id.includes('prosemirror')) return 'vendor-editor';
             if (id.includes('@react-pdf') || id.includes('pdfkit')) return 'vendor-pdf';
             if (id.includes('leaflet')) return 'vendor-map';
-            if (id.includes('firebase') || id.includes('@firebase')) return 'vendor-firebase';
-            if (id.includes('@mui') || id.includes('@emotion')) return 'vendor-mui';
-            if (id.includes('framer-motion') || id.includes('motion-dom')) return 'vendor-motion';
+            if (id.includes('react-icons')) return 'vendor-icons';
+            // `re2js` est tiré par firebase/auth (évaluation des politiques de
+            // mot de passe à l'abri des expressions régulières pathologiques).
+            if (id.includes('firebase') || id.includes('@firebase') || id.includes('re2js')) {
+              return 'vendor-firebase';
+            }
+            // Satellites de MUI/Emotion : ils évoluent avec MUI, donc ils
+            // partagent son chunk (invalidation de cache cohérente).
+            if (
+              id.includes('@mui') ||
+              id.includes('@emotion') ||
+              id.includes('@popperjs') ||
+              id.includes('stylis') ||
+              id.includes('react-transition-group') ||
+              id.includes('hoist-non-react-statics') ||
+              id.includes('react-is') ||
+              id.includes('clsx')
+            ) {
+              return 'vendor-mui';
+            }
+            if (
+              id.includes('framer-motion') ||
+              id.includes('motion-dom') ||
+              id.includes('motion-utils')
+            ) {
+              return 'vendor-motion';
+            }
             if (id.includes('@tanstack')) return 'vendor-query';
             if (
               id.includes('react-router') ||

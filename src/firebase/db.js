@@ -139,4 +139,37 @@ export function subDoc(segments, id) {
 /** Horodatage serveur — seule source d'heure autorisée pour l'audit. */
 export const now = serverTimestamp;
 
+/**
+ * Primitives Firestore réexportées.
+ *
+ * Les services les importent depuis ce module plutôt que depuis `firebase/*`
+ * directement : la couche `src/firebase/` reste le seul point de contact avec
+ * le SDK, ce qui rend un changement de version ou de backend localisable.
+ */
+export {
+  getDoc,
+  getDocs,
+  getCountFromServer,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  deleteField,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+  endBefore,
+  onSnapshot,
+  writeBatch,
+  runTransaction,
+  increment,
+  arrayUnion,
+  arrayRemove,
+  documentId,
+  serverTimestamp,
+  Timestamp,
+} from 'firebase/firestore';
+
 export default db;

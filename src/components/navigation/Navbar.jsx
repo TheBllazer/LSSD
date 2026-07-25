@@ -4,13 +4,15 @@ import { MdChevronRight } from 'react-icons/md';
 import { ALL_NAV } from '@/app/config/navigation';
 import { env } from '@/app/config/env';
 import TopProgressBar from '@/components/feedback/TopProgressBar';
+import UserMenu from './UserMenu';
 
 /**
- * Barre supérieure : identité de l'agence et localisation dans l'application.
+ * Barre supérieure : identité de l'agence, localisation dans l'application et
+ * menu de l'agent connecté.
  *
- * Les zones dépendant de la session (menu agent, notifications) sont ajoutées
- * en phase 1, la recherche globale Ctrl+K en phase 10 : aucun élément
- * décoratif non fonctionnel n'est affiché ici.
+ * La recherche globale Ctrl+K et le centre de notifications viendront s'insérer
+ * ici en phase 10 : aucun élément décoratif non fonctionnel n'est affiché
+ * avant d'être opérationnel.
  */
 export default function Navbar() {
   const location = useLocation();
@@ -91,6 +93,10 @@ export default function Navbar() {
           v{env.app.version}
         </Typography>
       </Tooltip>
+
+      <Box sx={{ width: 1, height: 22, bgcolor: 'divider' }} />
+
+      <UserMenu />
     </Stack>
   );
 }

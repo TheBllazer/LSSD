@@ -121,7 +121,16 @@ export function describeAuthError(error) {
       return 'Cette adresse e-mail est déjà associée à un compte.';
     case 'auth/weak-password':
       return 'Mot de passe trop faible (8 caractères minimum).';
+    case 'auth/operation-not-allowed':
+      return "L'authentification par e-mail n'est pas activée sur le projet Firebase.";
+    case 'auth/configuration-not-found':
+      return 'Configuration Firebase Authentication introuvable pour ce projet.';
+    case 'auth/unauthorized-domain':
+      return "Ce domaine n'est pas autorisé dans les réglages Firebase Authentication.";
     default:
+      // Le code inconnu est tracé : sans lui, diagnostiquer une erreur de
+      // configuration du projet reviendrait à deviner.
+      console.warn('[LSSD] Code d\'erreur Auth non traité :', code, error);
       return "Échec de l'authentification. Réessayez.";
   }
 }

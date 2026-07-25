@@ -1,7 +1,13 @@
 import { Suspense, useMemo } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { MdCircle, MdStorage, MdWifi } from 'react-icons/md';
+import {
+  MdCircle,
+  MdGroups,
+  MdShield,
+  MdBadge,
+  MdStorage,
+} from 'react-icons/md';
 import Navbar from '@/components/navigation/Navbar';
 import Sidebar from '@/components/navigation/Sidebar';
 import { StatusBar, StatusItem, StatusSpacer } from '@/components/system';
@@ -10,8 +16,13 @@ import ModuleSkeleton from '@/components/feedback/ModuleSkeleton';
 import useLocalStorage from '@/hooks/ui/useLocalStorage';
 import useHotkeys from '@/hooks/ui/useHotkeys';
 import useClock from '@/hooks/ui/useClock';
+import useAuth from '@/hooks/auth/useAuth';
+import useOnlineAgents from '@/hooks/data/useOnlineAgents';
 import { ALL_NAV } from '@/app/config/navigation';
 import { STORAGE_KEYS } from '@/app/config/constants';
+import { ROLE_LABELS, hasAbility } from '@/utils/permissions';
+import { DIVISION_LABELS } from '@/types/agents';
+import { agentSignature } from '@/utils/format';
 import { env } from '@/app/config/env';
 
 /**
@@ -23,22 +34,29 @@ import { env } from '@/app/config/env';
 export default function AppShell() {
   const navigate = useNavigate();
   const clock = useClock();
+  const { agent, role, abilities } = useAuth();
+  const { count: onlineCount } = useOnlineAgents();
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage(
     STORAGE_KEYS.SIDEBAR_COLLAPSED,
     false,
   );
 
-  /** Ctrl+B : repli de la barre latérale · Ctrl+1..9 : accès direct aux modules. */
+  /**
+   * Ctrl+B : repli de la barre latérale.
+   * Ctrl+1..9 : accès direct à un module — uniquement ceux auxquels l'agent a
+   * droit, sinon le raccourci mènerait à un écran « accès refusé ».
+   */
   const hotkeys = useMemo(() => {
     const bindings = {
       'ctrl+b': () => setSidebarCollapsed((value) => !value),
     };
     for (const item of ALL_NAV) {
       if (!item.shortcut) continue;
+      if (item.permission && !hasAbility(abilities, item.permission)) continue;
       bindings[`ctrl+${item.shortcut}`] = () => navigate(item.path);
     }
     return bindings;
-  }, [navigate, setSidebarCollapsed]);
+  }, [navigate, setSidebarCollapsed, abilities]);
 
   useHotkeys(hotkeys);
 
@@ -77,21 +95,43 @@ export default function AppShell() {
       </Box>
 
       <StatusBar>
-        <StatusItem icon={<MdCircle size={8} />} color="var(--ok)">
-          SYSTÈME OPÉRATIONNEL
+        <StatusItem icon={<MdCircle size={8} />} color="var(--ok)" tooltip="État du terminal">
+          EN SERVICE
         </StatusItem>
+
+        <StatusItem icon={<MdBadge size={12} />} mono tooltip="Agent connecté">
+          {agentSignature(agent)}
+        </StatusItem>
+
+        <StatusItem icon={<MdShield size={12} />} tooltip="Habilitation">
+          {ROLE_LABELS[role] ?? '—'}
+        </StatusItem>
+
+        {agent?.division && (
+          <StatusItem tooltip="Division d'affectation">
+            {DIVISION_LABELS[agent.division] ?? agent.division}
+          </StatusItem>
+        )}
+
+        {agent?.callsign && (
+          <StatusItem mono tooltip="Indicatif radio">
+            {agent.callsign}
+          </StatusItem>
+        )}
+
+        <StatusSpacer />
+
+        <StatusItem
+          icon={<MdGroups size={13} />}
+          tooltip="Agents actuellement connectés"
+          color={onlineCount > 0 ? 'var(--ok)' : undefined}
+        >
+          {onlineCount} en ligne
+        </StatusItem>
+
         <StatusItem icon={<MdStorage size={12} />} tooltip="Projet Firebase actif">
           {env.firebase.projectId || 'non configuré'}
         </StatusItem>
-        <StatusItem icon={<MdWifi size={12} />} tooltip="Mode d'exécution">
-          {env.useEmulators
-            ? 'ÉMULATEURS LOCAUX'
-            : env.isDev
-              ? 'DÉVELOPPEMENT · FIREBASE DISTANT'
-              : 'PRODUCTION'}
-        </StatusItem>
-
-        <StatusSpacer />
 
         <StatusItem mono tooltip="Heure de service">
           {clock}

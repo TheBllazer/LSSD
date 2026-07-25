@@ -214,12 +214,44 @@ Composant  ──useCitizens()──►  TanStack Query
 ## 8. Découpage du bundle
 
 ```
-vendor-react     react, react-dom, react-router
-vendor-mui       @mui/material, @mui/x-data-grid, @emotion
-vendor-firebase  firebase/app|auth|firestore
-vendor-editor    @tiptap/*            (chargé à l'ouverture d'un rapport)
-vendor-pdf       @react-pdf/renderer  (chargé à l'export)
+vendor-react     react, react-dom, react-router, scheduler
+vendor-mui       @mui/*, @emotion, @popperjs, stylis, react-transition-group
+vendor-firebase  firebase/app|auth|firestore, re2js
+vendor-motion    framer-motion, motion-dom, motion-utils
+vendor-query     @tanstack/*
+vendor-icons     react-icons
+vendor           dayjs, react-hot-toast, idb, @babel/runtime
+vendor-editor    @tiptap/*              (chargé à l'ouverture d'un rapport)
+vendor-pdf       @react-pdf/renderer    (chargé à l'export)
 vendor-map       leaflet, react-leaflet (chargé à l'ouverture de la carte)
 ```
+
 Chaque route est `React.lazy` + `<Suspense fallback={<ModuleSkeleton/>}>`.
-Cible : *first load* < 350 kB gzip.
+
+### Coût réel mesuré (fin de phase 1)
+
+| Chunk | gzip |
+|---|---|
+| vendor-firebase | 192 kB |
+| vendor-react | 91 kB |
+| vendor-mui | 86 kB |
+| vendor-motion | 42 kB |
+| index (code applicatif) | 18 kB |
+| vendor + query + icons + css | 31 kB |
+| **Total au premier chargement** | **≈ 460 kB** |
+
+La cible initiale de 350 kB, posée avant toute mesure, n'est pas atteignable
+avec cette pile : à elle seule, la paire `firebase/auth` + `firebase/firestore`
+pèse 192 kB gzip (dont ~60 kB pour `re2js`, tiré par l'évaluation des
+politiques de mot de passe). Les trois autres gros postes sont imposés par le
+cahier des charges (React 19, Material UI, Framer Motion).
+
+**Engagement révisé : premier chargement < 500 kB gzip, maintenu jusqu'à la
+phase 10.** Il tient à une condition — que TipTap, React-PDF et Leaflet restent
+strictement chargés à la demande. C'est la raison du découpage ci-dessus et de
+la forme fonctionnelle de `manualChunks` dans `vite.config.js`.
+
+Piste conservée si le budget devait être resserré : différer l'import de
+`firebase/firestore` jusqu'après l'authentification, ce qui allégerait l'écran
+de connexion d'environ 130 kB gzip. Le gain est nul pour un agent dont la
+session est déjà ouverte — d'où le choix de ne pas complexifier pour l'instant.
