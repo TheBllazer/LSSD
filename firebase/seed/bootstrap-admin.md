@@ -36,6 +36,10 @@ Puis **Authentication → Settings → User actions** :
 Copier l'**UID** généré (chaîne d'environ 28 caractères). Il sert d'identifiant
 de document dans les deux étapes suivantes.
 
+> **Raccourci** : si le compte existe déjà et que vous vous connectez à
+> l'application, l'écran « Compte non provisionné » affiche l'UID avec un bouton
+> de copie. Inutile d'aller le chercher dans la console.
+
 ---
 
 ## 3. Créer le document de permissions
@@ -91,6 +95,10 @@ de document dans les deux étapes suivantes.
 
 **Types attendus** : `role` chaîne · `level` nombre · `grants`, `revokes`,
 `abilities` tableaux de chaînes · `disabled` booléen.
+
+Le même contenu, complet et prêt à l'emploi, est disponible dans
+[`permissions-admin.json`](permissions-admin.json). Il est régénéré par la
+commande indiquée plus bas à chaque évolution de la table des permissions.
 
 > Ce document est régénéré automatiquement par l'application à partir de
 > `compileAbilities()` dès qu'un administrateur modifie les droits d'un agent.

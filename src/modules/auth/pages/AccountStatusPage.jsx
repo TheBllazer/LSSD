@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import {
   MdBlock,
   MdPersonOff,
   MdCloudOff,
   MdLogout,
   MdRefresh,
+  MdContentCopy,
+  MdCheck,
 } from 'react-icons/md';
 import AuthLayout from '@/layouts/AuthLayout';
 import useAuth from '@/hooks/auth/useAuth';
@@ -54,6 +56,7 @@ const VARIANTS = {
 export default function AccountStatusPage() {
   const { status, user, error, logout, refresh } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const variant = VARIANTS[status] ?? VARIANTS[AUTH_STATUS.ERROR];
   const Icon = variant.icon;
@@ -135,11 +138,8 @@ export default function AccountStatusPage() {
             {variant.hint}
           </Typography>
 
-          {user?.email && (
-            <Stack
-              direction="row"
-              spacing={1}
-              alignItems="baseline"
+          {user && (
+            <Box
               sx={{
                 mb: 2.25,
                 pt: 1.25,
@@ -147,11 +147,45 @@ export default function AccountStatusPage() {
                 borderColor: 'var(--line-soft)',
               }}
             >
-              <Typography className="label-caps">Compte concerné</Typography>
-              <Typography className="mono selectable" sx={{ fontSize: 12 }}>
-                {user.email}
-              </Typography>
-            </Stack>
+              <Stack direction="row" spacing={1} alignItems="baseline" sx={{ mb: 0.5 }}>
+                <Typography className="label-caps" sx={{ width: 110 }}>
+                  Compte concerné
+                </Typography>
+                <Typography className="mono selectable" sx={{ fontSize: 12 }}>
+                  {user.email}
+                </Typography>
+              </Stack>
+
+              {/*
+                L'identifiant technique est affiché ici parce qu'il est
+                indispensable au provisionnement : c'est lui qui sert
+                d'identifiant aux documents `permissions/{uid}` et
+                `agents/{uid}`. L'afficher évite d'aller le chercher dans la
+                console Firebase.
+              */}
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography className="label-caps" sx={{ width: 110 }}>
+                  Identifiant
+                </Typography>
+                <Typography className="mono selectable" sx={{ fontSize: 12, flex: 1 }}>
+                  {user.uid}
+                </Typography>
+                <Tooltip title={copied ? 'Copié' : "Copier l'identifiant"}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(user.uid);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    }}
+                    aria-label="Copier l'identifiant"
+                    sx={{ color: copied ? 'success.main' : undefined }}
+                  >
+                    {copied ? <MdCheck size={15} /> : <MdContentCopy size={14} />}
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            </Box>
           )}
 
           <Stack direction="row" spacing={1}>
