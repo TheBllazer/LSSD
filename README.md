@@ -92,8 +92,13 @@ dessus.
 
 ## Déploiement GitHub Pages
 
+Deux voies existent. **Une seule doit être active à la fois** : la source des
+Pages se règle dans *Settings → Pages → Build and deployment → Source*.
+
+### Voie A — GitHub Actions (recommandée quand disponible)
+
 Le workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
-construit et publie automatiquement à chaque push sur `main`.
+construit et publie à chaque push sur `main`.
 
 1. **Settings → Pages → Source : GitHub Actions**
 2. **Settings → Secrets and variables → Actions**, ajouter :
@@ -101,15 +106,57 @@ construit et publie automatiquement à chaque push sur `main`.
    `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`,
    `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`,
    et éventuellement `VITE_RECAPTCHA_SITE_KEY`.
-3. **Console Firebase → Authentication → Settings → Authorized domains** :
-   ajouter `<utilisateur>.github.io`.
 
-Le chemin de base est déduit du nom du dépôt (`/LSSD/`). Pour un domaine
-personnalisé, définissez `VITE_BASE_PATH=/`.
+> ⚠️ GitHub Actions est actuellement **indisponible sur ce compte** : les
+> exécutions échouent avec *« your account is locked due to a billing issue »*.
+> Utiliser la voie B tant que ce point n'est pas réglé.
+
+### Voie B — Branche `gh-pages` (fonctionne sans Actions)
+
+Le build est produit localement puis publié sur la branche `gh-pages`, prise en
+charge par le déployeur natif de GitHub Pages (non soumis à la facturation
+Actions).
+
+1. **Settings → Pages → Source : Deploy from a branch → `gh-pages` / `(root)`**
+2. Renseigner `.env.local` (les clés sont lues au moment du build local)
+3. Publier :
+
+```bash
+npm run deploy
+```
+
+> ⚠️ Cette commande **remplace intégralement** le contenu de la branche
+> `gh-pages`, donc le site actuellement en ligne. À n'exécuter qu'en connaissance
+> de cause.
+
+### Chemin de base et domaine
+
+Le chemin de base est piloté par `VITE_BASE_PATH` :
+
+| Cible | `VITE_BASE_PATH` | Fichier `public/CNAME` |
+|---|---|---|
+| `https://<utilisateur>.github.io/LSSD/` | `/LSSD/` *(valeur actuelle)* | absent — et le domaine personnalisé doit être retiré des réglages Pages |
+| Domaine personnalisé (ex. `lssd.exemple.fr`) | `/` | présent, contenant le domaine |
+
+Les deux sont exclusifs : un domaine personnalisé configuré dans les réglages
+Pages sert le site à la racine, ce qui casse un build compilé avec `/LSSD/`.
+
+Enfin, **Console Firebase → Authentication → Settings → Authorized domains** :
+ajouter le domaine de publication, sans quoi la connexion sera refusée.
+
+### Routage
 
 Le routage utilise `HashRouter` (`/LSSD/#/citizens/…`) : c'est le seul moyen
 fiable d'obtenir des liens directs et un rafraîchissement fonctionnel sur un
 hébergement statique sans réécriture d'URL.
+
+## Branches du dépôt
+
+| Branche | Contenu |
+|---|---|
+| `main` | Réécriture en cours (Vite + React 19 + MUI) — ce dépôt |
+| `legacy-mdt` | Sauvegarde de la version précédente « LSSD Mobile Data Terminal » (Create React App), conservée intacte |
+| `gh-pages` | Build déployé de la version précédente |
 
 ---
 
