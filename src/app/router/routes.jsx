@@ -25,7 +25,9 @@ const DashboardPage = lazy(() => import('@/modules/dashboard/pages/DashboardPage
 const CitizenListPage = lazy(() => import('@/modules/citizens/pages/CitizenListPage'));
 const CitizenDetailPage = lazy(() => import('@/modules/citizens/pages/CitizenDetailPage'));
 const VehicleListPage = lazy(() => import('@/modules/vehicles/pages/VehicleListPage'));
+const VehicleDetailPage = lazy(() => import('@/modules/vehicles/pages/VehicleDetailPage'));
 const WeaponListPage = lazy(() => import('@/modules/weapons/pages/WeaponListPage'));
+const WeaponDetailPage = lazy(() => import('@/modules/weapons/pages/WeaponDetailPage'));
 const ReportListPage = lazy(() => import('@/modules/reports/pages/ReportListPage'));
 const RecordListPage = lazy(() => import('@/modules/criminal-records/pages/RecordListPage'));
 const MapPage = lazy(() => import('@/modules/map/pages/MapPage'));
@@ -72,7 +74,15 @@ export const routes = [
         element: guarded(PERMISSIONS.CITIZENS_READ, <CitizenDetailPage />),
       },
       { path: 'vehicles', element: guarded(PERMISSIONS.VEHICLES_READ, <VehicleListPage />) },
+      {
+        path: 'vehicles/:id',
+        element: guarded(PERMISSIONS.VEHICLES_READ, <VehicleDetailPage />),
+      },
       { path: 'weapons', element: guarded(PERMISSIONS.WEAPONS_READ, <WeaponListPage />) },
+      {
+        path: 'weapons/:id',
+        element: guarded(PERMISSIONS.WEAPONS_READ, <WeaponDetailPage />),
+      },
       { path: 'reports', element: guarded(PERMISSIONS.REPORTS_READ, <ReportListPage />) },
       { path: 'records', element: guarded(PERMISSIONS.RECORDS_READ, <RecordListPage />) },
       { path: 'map', element: guarded(PERMISSIONS.MAP_READ, <MapPage />) },

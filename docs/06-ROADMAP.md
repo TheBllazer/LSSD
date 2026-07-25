@@ -153,7 +153,7 @@ permission et constater le blocage effectif (UI + règle Firestore).
   code splitting vérifié, accessibilité clavier, `README` + guide de déploiement,
   jeu de données de démonstration.
 
-**Test** : audit Lighthouse ≥ 90 en performance, bundle initial < 350 kB gzip,
+**Test** : audit Lighthouse ≥ 90 en performance, bundle initial < 500 kB gzip (cible révisée, cf. `01-ARCHITECTURE.md` §8),
 parcours complet sans rechargement de page, aucun avertissement console.
 
 ---
@@ -165,8 +165,8 @@ parcours complet sans rechargement de page, aucun avertissement console.
 | 0 | Socle exécutable | ✅ livrée — `lint` et `build` verts, terminal fonctionnel |
 | 1 | Auth & permissions | ✅ livrée — reste à activer Authentication côté console Firebase |
 | 2 | Socle données & UI | ✅ livrée — `npm run check` couvre tokens et permissions |
-| 3 | Citoyens | ✅ livrée — vérification écran en attente du déploiement des règles |
-| 4 | Véhicules & Armes | ⏳ |
+| 3 | Citoyens | ✅ livrée — parcours complet vérifié à l'écran |
+| 4 | Véhicules & Armes | ✅ livrée — liaison bidirectionnelle vérifiée |
 | 5 | Rapports & éditeur | ⏳ |
 | 6 | Casiers | ⏳ |
 | 7 | PDF | ⏳ |

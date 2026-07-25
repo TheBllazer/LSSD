@@ -28,7 +28,7 @@ import { DIVISION_LABELS, RANK_LABELS } from '@/types/agents';
  * Modules effectivement livrés.
  * Mis à jour à chaque phase — voir `docs/06-ROADMAP.md`.
  */
-const DELIVERED_MODULES = new Set(['dashboard', 'citizens']);
+const DELIVERED_MODULES = new Set(['dashboard', 'citizens', 'vehicles', 'weapons']);
 
 /**
  * Ligne d'état d'un sous-système, avec pastille de validité.

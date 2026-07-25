@@ -11,5 +11,6 @@ export {
   TagInput,
 } from './Fields';
 export { default as PhotoUrlField } from './PhotoUrlField';
+export { default as CitizenPicker, CitizenAutocomplete } from './CitizenPicker';
 export { default as AutoSaveIndicator } from './AutoSaveIndicator';
 export { default as FormWatcher } from './FormWatcher';

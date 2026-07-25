@@ -5,3 +5,5 @@ export { default as TableToolbar } from './TableToolbar';
 export { default as TableSkeleton } from './TableSkeleton';
 export { default as EmptyState } from './EmptyState';
 export { default as BulkActionBar, BulkAction } from './BulkActionBar';
+export { default as OwnerAssignment } from './OwnerAssignment';
+export { default as HistoryTimeline } from './HistoryTimeline';

@@ -30,6 +30,10 @@ import PhotosTab from '../components/tabs/PhotosTab';
 import HistoryTab from '../components/tabs/HistoryTab';
 import NotesTab from '../components/tabs/NotesTab';
 import RelationTab from '../components/tabs/RelationTab';
+import {
+  CitizenVehiclesTab,
+  CitizenWeaponsTab,
+} from '../components/tabs/OwnedAssetsTab';
 import CitizenSummaryPanel from '../components/CitizenSummaryPanel';
 import { citizenSchema } from '../schemas/citizenSchema';
 import {
@@ -231,36 +235,10 @@ export default function CitizenDetailPage() {
         );
 
       case 'vehicles':
-        return (
-          <RelationTab
-            title="Véhicules enregistrés"
-            phase={4}
-            count={citizen.counters?.vehicles ?? 0}
-            icon={<MdDirectionsCar />}
-            scope={[
-              'Plaque, marque, modèle, année, couleur et état de chaque véhicule',
-              'Assurance, immatriculation, mise en fourrière et signalements',
-              'Ouverture directe de la fiche véhicule dans un onglet',
-              'Transfert de propriété avec trace dans les deux historiques',
-            ]}
-          />
-        );
+        return <CitizenVehiclesTab citizenId={id} />;
 
       case 'weapons':
-        return (
-          <RelationTab
-            title="Armes déclarées"
-            phase={4}
-            count={citizen.counters?.weapons ?? 0}
-            icon={<GiPistolGun />}
-            scope={[
-              'Numéro de série, marque, modèle, calibre et catégorie',
-              'Permis de port d\'arme associé et alerte si celui-ci est invalide',
-              'Statut : enregistrée, saisie, volée, détruite',
-              'Rapports dans lesquels l\'arme apparaît',
-            ]}
-          />
-        );
+        return <CitizenWeaponsTab citizenId={id} />;
 
       case 'reports':
         return (
