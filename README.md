@@ -92,33 +92,12 @@ dessus.
 
 ## Déploiement GitHub Pages
 
-Deux voies existent. **Une seule doit être active à la fois** : la source des
-Pages se règle dans *Settings → Pages → Build and deployment → Source*.
-
-### Voie A — GitHub Actions (recommandée quand disponible)
-
-Le workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
-construit et publie à chaque push sur `main`.
-
-1. **Settings → Pages → Source : GitHub Actions**
-2. **Settings → Secrets and variables → Actions**, ajouter :
-   `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`,
-   `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`,
-   `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`,
-   et éventuellement `VITE_RECAPTCHA_SITE_KEY`.
-
-> ⚠️ GitHub Actions est actuellement **indisponible sur ce compte** : les
-> exécutions échouent avec *« your account is locked due to a billing issue »*.
-> Utiliser la voie B tant que ce point n'est pas réglé.
-
-### Voie B — Branche `gh-pages` (fonctionne sans Actions)
-
-Le build est produit localement puis publié sur la branche `gh-pages`, prise en
-charge par le déployeur natif de GitHub Pages (non soumis à la facturation
-Actions).
+Le déploiement est **manuel et local** : le build est produit sur le poste puis
+publié sur la branche `gh-pages`, prise en charge par le déployeur natif de
+GitHub Pages. Aucune intégration continue n'est utilisée.
 
 1. **Settings → Pages → Source : Deploy from a branch → `gh-pages` / `(root)`**
-2. Renseigner `.env.local` (les clés sont lues au moment du build local)
+2. Renseigner `.env.local` — les clés Firebase sont lues au moment du build
 3. Publier :
 
 ```bash
@@ -126,8 +105,11 @@ npm run deploy
 ```
 
 > ⚠️ Cette commande **remplace intégralement** le contenu de la branche
-> `gh-pages`, donc le site actuellement en ligne. À n'exécuter qu'en connaissance
-> de cause.
+> `gh-pages`, donc le site en ligne. À n'exécuter qu'en connaissance de cause.
+
+*Note : un workflow GitHub Actions avait été mis en place puis retiré — le
+compte est verrouillé pour un problème de facturation et les exécutions
+échouent avant même le checkout. Il reste récupérable dans l'historique Git.*
 
 ### Chemin de base et domaine
 
