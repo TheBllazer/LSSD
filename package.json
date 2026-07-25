@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "check": "node scripts/smoke.mjs",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist -m \"Deploiement LSSD RMS\"",
+    "deploy": "gh-pages -d dist -b gh-pages -r https://github.com/TheBllazer/LSSD.git -m \"Deploiement LSSD RMS\"",
     "rules:deploy": "npx --yes firebase-tools deploy --only firestore:rules,firestore:indexes",
     "emulators": "npx --yes firebase-tools emulators:start --only firestore,auth"
   },

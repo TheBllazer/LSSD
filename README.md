@@ -120,11 +120,29 @@ npm run deploy
 ```
 
 > ⚠️ Cette commande **remplace intégralement** le contenu de la branche
-> `gh-pages`, donc le site en ligne. À n'exécuter qu'en connaissance de cause.
+> `gh-pages`, y compris le fichier `CNAME` qui porte le domaine personnalisé.
+> À n'exécuter qu'en connaissance de cause.
 
-*Note : un workflow GitHub Actions avait été mis en place puis retiré — le
-compte est verrouillé pour un problème de facturation et les exécutions
-échouent avant même le checkout. Il reste récupérable dans l'historique Git.*
+### État actuel de la publication
+
+**GitHub Pages ne publie plus rien sur ce compte.** Constats au 25/07/2026 :
+
+- `https://thebllazer.github.io/LSSD/` et `https://lssd.thebllazer.fr/`
+  répondent tous deux **404** ;
+- le dernier déploiement Pages enregistré date du **15/07/2026** ;
+- les exécutions GitHub Actions échouent avec
+  *« your account is locked due to a billing issue »*.
+
+Le déployeur natif de la branche `gh-pages` (`pages build and deployment`) est
+lui aussi une exécution Actions : il est soumis au même verrou. **Tant que la
+situation de facturation n'est pas régularisée, `npm run deploy` poussera bien
+la branche, mais rien ne sera mis en ligne.**
+
+La version précédente de l'application reste intacte sur la branche
+`legacy-mdt`, et son build sur `gh-pages`.
+
+*Un workflow GitHub Actions avait été mis en place puis retiré ; il reste
+récupérable dans l'historique Git si la facturation est rétablie.*
 
 ### Chemin de base et domaine
 
