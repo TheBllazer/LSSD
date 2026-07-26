@@ -168,7 +168,7 @@ parcours complet sans rechargement de page, aucun avertissement console.
 | 3 | Citoyens | ✅ livrée — parcours complet vérifié à l'écran |
 | 4 | Véhicules & Armes | ✅ livrée — liaison bidirectionnelle vérifiée |
 | 5 | Rapports & éditeur | ✅ livrée |
-| 6 | Casiers | ⏳ |
+| 6 | Casiers | ✅ livrée |
 | 7 | PDF | ⏳ |
 | 8 | Carte SIG | ⏳ |
 | 9 | Agents & admin | ⏳ |

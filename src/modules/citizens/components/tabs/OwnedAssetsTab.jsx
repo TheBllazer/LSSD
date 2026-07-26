@@ -1,5 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material';
-import { MdDirectionsCar, MdLaunch, MdWarning, MdLocalParking } from 'react-icons/md';
+import { MdDirectionsCar, MdLaunch, MdWarning, MdLocalParking, MdGavel } from 'react-icons/md';
 import { GiPistolGun } from 'react-icons/gi';
 import Panel from '@/components/system/Panel';
 import StatusChip from '@/components/system/StatusChip';
@@ -9,8 +9,9 @@ import TableSkeleton from '@/components/data/TableSkeleton';
 import useOpenRecord from '@/hooks/ui/useOpenRecord';
 import { useAllVehicles } from '@/hooks/data/useVehicles';
 import { useAllWeapons } from '@/hooks/data/useWeapons';
+import { useAllRecords } from '@/hooks/data/useCriminalRecords';
 import { ENTITY_TYPES } from '@/app/config/constants';
-import { formatDate } from '@/utils/dates';
+import { formatDate, formatDurationDays } from '@/utils/dates';
 import {
   VEHICLE_TYPE_LABELS,
   REGISTRATION_STATUS_LABELS,
@@ -22,6 +23,11 @@ import {
   WEAPON_CLASSIFICATIONS,
   WEAPON_STATUS_LABELS,
 } from '@/types/weapons';
+import {
+  RECORD_TYPE_LABELS,
+  DISPOSITION_LABELS,
+  RECORD_STATUS_LABELS,
+} from '@/types/records';
 
 /**
  * Ligne cliquable d'un bien rattaché.
@@ -167,6 +173,79 @@ export function CitizenVehiclesTab({ citizenId }) {
               id: vehicle.id,
               title: vehicle.plate,
               subtitle: [vehicle.make, vehicle.model].filter(Boolean).join(' '),
+            })
+          }
+        />
+      ))}
+    </Panel>
+  );
+}
+
+/**
+ * Onglet « Casier » d'une fiche citoyen.
+ *
+ * Interroge le registre des casiers par `citizenId`. Le statut judiciaire
+ * affiché en tête de fiche découle de ces casiers : c'est ici qu'on en voit
+ * le détail.
+ *
+ * @param {{ citizenId: string }} props
+ */
+export function CitizenRecordsTab({ citizenId }) {
+  const openRecord = useOpenRecord();
+  const {
+    data: records = [],
+    isLoading,
+    error,
+  } = useAllRecords({
+    filters: [{ field: 'citizenId', op: '==', value: citizenId }],
+    max: 100,
+  });
+
+  if (isLoading) return <TableSkeleton rows={4} />;
+
+  if (error) return <QueryError error={error} icon={<MdGavel />} />;
+
+  if (records.length === 0) {
+    return (
+      <EmptyState
+        icon={<MdGavel />}
+        title="Casier vierge"
+        message="Aucune procédure judiciaire n'est enregistrée au nom de ce citoyen."
+      />
+    );
+  }
+
+  return (
+    <Panel title={`Casier judiciaire (${records.length})`} icon={<MdGavel />} dense>
+      {records.map((record) => (
+        <AssetRow
+          key={record.id}
+          photoUrl={record.mugshotUrl}
+          title={`${record.number} — ${(record.charges ?? [])
+            .map((charge) => charge.code)
+            .join(', ')}`}
+          subtitle={[
+            RECORD_TYPE_LABELS[record.type] ?? record.type,
+            DISPOSITION_LABELS[record.disposition] ?? record.disposition,
+            record.date ? formatDate(record.date) : null,
+            record.sentence?.prisonDays
+              ? `${formatDurationDays(record.sentence.prisonDays)} de prison`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+          badges={
+            <StatusChip
+              status={record.status}
+              label={RECORD_STATUS_LABELS[record.status] ?? record.status}
+            />
+          }
+          onOpen={() =>
+            openRecord({
+              type: ENTITY_TYPES.RECORD,
+              id: record.id,
+              title: record.number,
+              subtitle: record.citizenSnapshot?.label,
             })
           }
         />

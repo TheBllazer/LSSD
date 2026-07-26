@@ -33,6 +33,7 @@ import RelationTab from '../components/tabs/RelationTab';
 import {
   CitizenVehiclesTab,
   CitizenWeaponsTab,
+  CitizenRecordsTab,
 } from '../components/tabs/OwnedAssetsTab';
 import CitizenSummaryPanel from '../components/CitizenSummaryPanel';
 import { citizenSchema } from '../schemas/citizenSchema';
@@ -256,20 +257,7 @@ export default function CitizenDetailPage() {
         );
 
       case 'record':
-        return (
-          <RelationTab
-            title="Casier judiciaire"
-            phase={6}
-            count={citizen.counters?.records ?? 0}
-            icon={<MdGavel />}
-            scope={[
-              'Chefs d\'accusation codifiés, disposition et juridiction',
-              'Peine détaillée : prison, probation, travaux d\'intérêt général, amende',
-              'Progression de la peine purgée et statut du casier',
-              'Rapport d\'arrestation lié',
-            ]}
-          />
-        );
+        return <CitizenRecordsTab citizenId={id} />;
 
       case 'photos':
         return (

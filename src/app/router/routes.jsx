@@ -31,6 +31,7 @@ const WeaponDetailPage = lazy(() => import('@/modules/weapons/pages/WeaponDetail
 const ReportListPage = lazy(() => import('@/modules/reports/pages/ReportListPage'));
 const ReportEditorPage = lazy(() => import('@/modules/reports/pages/ReportEditorPage'));
 const RecordListPage = lazy(() => import('@/modules/criminal-records/pages/RecordListPage'));
+const RecordDetailPage = lazy(() => import('@/modules/criminal-records/pages/RecordDetailPage'));
 const MapPage = lazy(() => import('@/modules/map/pages/MapPage'));
 const AgentListPage = lazy(() => import('@/modules/agents/pages/AgentListPage'));
 const AdminPage = lazy(() => import('@/modules/admin/pages/AdminPage'));
@@ -90,6 +91,10 @@ export const routes = [
         element: guarded(PERMISSIONS.REPORTS_READ, <ReportEditorPage />),
       },
       { path: 'records', element: guarded(PERMISSIONS.RECORDS_READ, <RecordListPage />) },
+      {
+        path: 'records/:id',
+        element: guarded(PERMISSIONS.RECORDS_READ, <RecordDetailPage />),
+      },
       { path: 'map', element: guarded(PERMISSIONS.MAP_READ, <MapPage />) },
       { path: 'agents', element: guarded(PERMISSIONS.AGENTS_READ, <AgentListPage />) },
       { path: 'admin', element: guarded(PERMISSIONS.ADMIN_SETTINGS, <AdminPage />) },

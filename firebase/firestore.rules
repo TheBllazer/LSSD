@@ -281,7 +281,11 @@ service cloud.firestore {
       }
 
       match /revisions/{revisionId} {
-        allow read:   if canReadReport();
+        // `canReadReport()` inspecte `resource.data.classification` : appliquée
+        // ici, elle porterait sur le document de révision, qui ne possède pas
+        // ce champ — et une règle qui lit un champ absent échoue. La
+        // confidentialité est déjà appliquée sur le rapport lui-même.
+        allow read:   if can('reports.read');
         allow create: if can('reports.create') || can('reports.update.own')
                       || can('reports.update.any');
         allow update: if false;
