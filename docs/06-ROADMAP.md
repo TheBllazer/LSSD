@@ -167,7 +167,7 @@ parcours complet sans rechargement de page, aucun avertissement console.
 | 2 | Socle données & UI | ✅ livrée — `npm run check` couvre tokens et permissions |
 | 3 | Citoyens | ✅ livrée — parcours complet vérifié à l'écran |
 | 4 | Véhicules & Armes | ✅ livrée — liaison bidirectionnelle vérifiée |
-| 5 | Rapports & éditeur | ⏳ |
+| 5 | Rapports & éditeur | ✅ livrée |
 | 6 | Casiers | ⏳ |
 | 7 | PDF | ⏳ |
 | 8 | Carte SIG | ⏳ |

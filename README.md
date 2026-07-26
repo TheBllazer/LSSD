@@ -207,7 +207,7 @@ Le chemin est toujours `composant → hook → service → firebase/`.
 | 2 | Socle de données et composants transverses | ✅ livrée |
 | 3 | Registre des citoyens | ✅ livrée |
 | 4 | Registres véhicules et armes | ✅ livrée |
-| 5 | Rapports et éditeur TipTap | ⏳ |
+| 5 | Rapports et éditeur TipTap | ✅ livrée |
 | 6 | Casiers judiciaires | ⏳ |
 | 7 | Export PDF | ⏳ |
 | 8 | Carte interactive (SIG) | ⏳ |

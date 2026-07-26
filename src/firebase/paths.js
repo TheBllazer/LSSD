@@ -68,6 +68,8 @@ export const paths = {
   weaponHistory: (weaponId) =>
     [COLLECTIONS.WEAPONS, weaponId, SUBCOLLECTIONS.HISTORY],
 
+  reportHistory: (reportId) =>
+    [COLLECTIONS.REPORTS, reportId, SUBCOLLECTIONS.HISTORY],
   reportRevisions: (reportId) =>
     [COLLECTIONS.REPORTS, reportId, SUBCOLLECTIONS.REVISIONS],
   reportAttachments: (reportId) =>

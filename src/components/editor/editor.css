@@ -1,0 +1,196 @@
+/* ==========================================================================
+   Éditeur de rapports — mise en page « document officiel »
+   La zone d'édition reproduit une page A4 : ce que l'agent rédige ressemble
+   déjà au PDF qui sera signé et versé au dossier.
+   ========================================================================== */
+
+.report-editor {
+  width: 794px; /* A4 à 96 dpi */
+  min-height: 1000px;
+  padding: 56px 64px;
+  background: #10182a;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  line-height: 1.65;
+  outline: none;
+}
+
+.report-editor > * + * {
+  margin-top: 0.75em;
+}
+
+/* --- Titres de section ---------------------------------------------------- */
+.report-editor h1,
+.report-editor h2,
+.report-editor h3 {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-strong);
+  margin-top: 1.6em;
+}
+
+.report-editor h1 {
+  font-size: 17px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 4px;
+}
+
+.report-editor h2 {
+  font-size: 14.5px;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 3px;
+}
+
+.report-editor h3 {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* --- Listes --------------------------------------------------------------- */
+.report-editor ul,
+.report-editor ol {
+  padding-left: 1.4em;
+}
+
+.report-editor li p {
+  margin: 0;
+}
+
+/* Listes de contrôle : cases réellement cochables */
+.report-editor ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0.2em;
+}
+
+.report-editor ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.report-editor ul[data-type='taskList'] input[type='checkbox'] {
+  margin-top: 4px;
+  accent-color: var(--accent);
+}
+
+/* --- Citations et code ---------------------------------------------------- */
+.report-editor blockquote {
+  margin-left: 0;
+  padding-left: 14px;
+  border-left: 3px solid var(--accent-dim);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.report-editor code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--navy-800);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.report-editor pre.report-code {
+  background: var(--navy-950);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 10px 12px;
+  overflow-x: auto;
+}
+
+.report-editor pre.report-code code {
+  background: none;
+  padding: 0;
+}
+
+/* --- Tableaux ------------------------------------------------------------- */
+.report-editor table.report-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  table-layout: fixed;
+}
+
+.report-editor table.report-table td,
+.report-editor table.report-table th {
+  border: 1px solid var(--line-strong);
+  padding: 5px 8px;
+  vertical-align: top;
+  position: relative;
+}
+
+.report-editor table.report-table th {
+  background: var(--navy-750);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+}
+
+.report-editor .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(45, 125, 210, 0.18);
+  pointer-events: none;
+}
+
+.report-editor .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+  cursor: col-resize;
+}
+
+/* --- Images et séparateurs ------------------------------------------------ */
+.report-editor img.report-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  display: block;
+  margin: 1em auto;
+}
+
+.report-editor img.report-image.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+}
+
+.report-editor hr {
+  border: none;
+  border-top: 1px solid var(--line-strong);
+  margin: 1.5em 0;
+}
+
+/* --- Liens ---------------------------------------------------------------- */
+.report-editor a {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* --- Texte de substitution ------------------------------------------------ */
+.report-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--muted-dim);
+  font-style: italic;
+}
+
+/* --- Lecture seule -------------------------------------------------------- */
+.report-editor[contenteditable='false'] {
+  opacity: 0.92;
+  cursor: default;
+}
