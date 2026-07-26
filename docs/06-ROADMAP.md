@@ -169,7 +169,7 @@ parcours complet sans rechargement de page, aucun avertissement console.
 | 4 | Véhicules & Armes | ✅ livrée — liaison bidirectionnelle vérifiée |
 | 5 | Rapports & éditeur | ✅ livrée |
 | 6 | Casiers | ✅ livrée |
-| 7 | PDF | ⏳ |
+| 7 | PDF | ✅ livrée — aperçu et journalisation vérifiés |
 | 8 | Carte SIG | ⏳ |
 | 9 | Agents & admin | ⏳ |
 | 10 | Dashboard, recherche, finitions | ⏳ |

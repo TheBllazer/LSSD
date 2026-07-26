@@ -30,6 +30,7 @@ import {
   PhotoUrlField,
   AutoSaveIndicator,
 } from '@/components/form';
+import PdfExportButton from '@/components/pdf/PdfExportButton';
 import Can from '@/components/auth/Can';
 import ModuleSkeleton from '@/components/feedback/ModuleSkeleton';
 import EmptyState from '@/components/data/EmptyState';
@@ -430,6 +431,8 @@ export default function VehicleDetailPage() {
           >
             Registre
           </Button>
+
+          <PdfExportButton templateId="vehicle" data={{ vehicle }} entityType={ENTITY_TYPES.VEHICLE} entityId={vehicle.id} entityLabel={vehicle.plate} />
 
           {!archived && (
             <Can do={PERMISSIONS.VEHICLES_UPDATE}>

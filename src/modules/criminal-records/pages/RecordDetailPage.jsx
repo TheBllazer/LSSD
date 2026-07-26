@@ -18,6 +18,7 @@ import KeyValueRow from '@/components/system/KeyValueRow';
 import SectionCard from '@/components/system/SectionCard';
 import PhotoGallery from '@/components/media/PhotoGallery';
 import ChargesEditor from '../components/ChargesEditor';
+import PdfExportButton from '@/components/pdf/PdfExportButton';
 import Can from '@/components/auth/Can';
 import ModuleSkeleton from '@/components/feedback/ModuleSkeleton';
 import EmptyState from '@/components/data/EmptyState';
@@ -449,6 +450,8 @@ export default function RecordDetailPage() {
           >
             Registre
           </Button>
+
+          <PdfExportButton templateId="record" data={{ record }} entityType={ENTITY_TYPES.RECORD} entityId={record.id} entityLabel={record.number} />
 
           {record.reportId && (
             <Button

@@ -28,6 +28,7 @@ import {
   PhotoUrlField,
   AutoSaveIndicator,
 } from '@/components/form';
+import PdfExportButton from '@/components/pdf/PdfExportButton';
 import Can from '@/components/auth/Can';
 import ModuleSkeleton from '@/components/feedback/ModuleSkeleton';
 import EmptyState from '@/components/data/EmptyState';
@@ -429,6 +430,8 @@ export default function WeaponDetailPage() {
           >
             Registre
           </Button>
+
+          <PdfExportButton templateId="weapon" data={{ weapon, owner: owner ?? null }} entityType={ENTITY_TYPES.WEAPON} entityId={weapon.id} entityLabel={weapon.serialNumber} />
 
           {!archived && (
             <Can do={PERMISSIONS.WEAPONS_DELETE}>

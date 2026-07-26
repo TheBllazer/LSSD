@@ -22,6 +22,7 @@ import PhotoPreview from '@/components/media/PhotoPreview';
 import StatusChip from '@/components/system/StatusChip';
 import { SeverityChip } from '@/components/system/StatusChip';
 import { AutoSaveIndicator } from '@/components/form';
+import PdfExportButton from '@/components/pdf/PdfExportButton';
 import Can from '@/components/auth/Can';
 import ModuleSkeleton from '@/components/feedback/ModuleSkeleton';
 import EmptyState from '@/components/data/EmptyState';
@@ -373,6 +374,14 @@ export default function CitizenDetailPage() {
               Registre
             </Button>
           </Tooltip>
+
+          <PdfExportButton
+            templateId="citizen"
+            data={{ citizen }}
+            entityType={ENTITY_TYPES.CITIZEN}
+            entityId={citizen.id}
+            entityLabel={registryName(citizen)}
+          />
 
           {!archived && (
             <Can do={PERMISSIONS.CITIZENS_DELETE}>
