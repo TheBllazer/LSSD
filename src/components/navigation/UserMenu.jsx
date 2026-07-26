@@ -9,7 +9,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { MdLogout, MdRefresh, MdExpandMore, MdShield } from 'react-icons/md';
+import { MdLogout, MdRefresh, MdExpandMore, MdShield, MdPerson } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import Avatar from '@/components/media/Avatar';
 import useAuth from '@/hooks/auth/useAuth';
@@ -164,8 +164,18 @@ export default function UserMenu() {
 
         <Divider />
 
-        {/* « Ma fiche de service » sera ajouté ici en phase 9, quand la route
-            /agents/:id existera — pas de lien mort dans l'intervalle. */}
+        <MenuItem
+          onClick={() => {
+            close();
+            navigate(ROUTES.AGENT(agent.uid));
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 0 }}>
+            <MdPerson size={15} />
+          </ListItemIcon>
+          Ma fiche de service
+        </MenuItem>
+
         <MenuItem onClick={handleRefresh}>
           <ListItemIcon sx={{ minWidth: 0 }}>
             <MdRefresh size={15} />

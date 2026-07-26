@@ -170,8 +170,8 @@ parcours complet sans rechargement de page, aucun avertissement console.
 | 5 | Rapports & éditeur | ✅ livrée |
 | 6 | Casiers | ✅ livrée |
 | 7 | PDF | ✅ livrée — aperçu et journalisation vérifiés |
-| 8 | Carte SIG | ✅ livrée |
-| 9 | Agents & admin | ⏳ |
+| 8 | Carte SIG | ✅ livrée — fond et canevas vérifiés |
+| 9 | Agents & admin | ✅ livrée |
 | 10 | Dashboard, recherche, finitions | ⏳ |
 
 **Extensions envisageables après la phase 10** (hors périmètre actuel) : mandats

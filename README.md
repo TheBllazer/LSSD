@@ -211,7 +211,7 @@ Le chemin est toujours `composant → hook → service → firebase/`.
 | 6 | Casiers judiciaires | ✅ livrée |
 | 7 | Export PDF | ✅ livrée |
 | 8 | Carte interactive (SIG) | ✅ livrée |
-| 9 | Agents et administration | ⏳ |
+| 9 | Agents et administration | ✅ livrée |
 | 10 | Tableau de bord, recherche globale, finitions | ⏳ |
 
 Détail et critères d'acceptation : [docs/06-ROADMAP.md](docs/06-ROADMAP.md).

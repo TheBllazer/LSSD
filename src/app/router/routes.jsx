@@ -34,6 +34,7 @@ const RecordListPage = lazy(() => import('@/modules/criminal-records/pages/Recor
 const RecordDetailPage = lazy(() => import('@/modules/criminal-records/pages/RecordDetailPage'));
 const MapPage = lazy(() => import('@/modules/map/pages/MapPage'));
 const AgentListPage = lazy(() => import('@/modules/agents/pages/AgentListPage'));
+const AgentDetailPage = lazy(() => import('@/modules/agents/pages/AgentDetailPage'));
 const AdminPage = lazy(() => import('@/modules/admin/pages/AdminPage'));
 const ForbiddenPage = lazy(() => import('@/modules/system/pages/ForbiddenPage'));
 const NotFoundPage = lazy(() => import('@/modules/system/pages/NotFoundPage'));
@@ -97,6 +98,10 @@ export const routes = [
       },
       { path: 'map', element: guarded(PERMISSIONS.MAP_READ, <MapPage />) },
       { path: 'agents', element: guarded(PERMISSIONS.AGENTS_READ, <AgentListPage />) },
+      {
+        path: 'agents/:id',
+        element: guarded(PERMISSIONS.AGENTS_READ, <AgentDetailPage />),
+      },
       { path: 'admin', element: guarded(PERMISSIONS.ADMIN_SETTINGS, <AdminPage />) },
       { path: 'forbidden', element: <ForbiddenPage /> },
       { path: '*', element: <NotFoundPage /> },
