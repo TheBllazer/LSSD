@@ -29,3 +29,8 @@ Thumbs.db
 npm-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Fond de carte source : 62 Mo de tracés vectoriels, qui alourdiraient chaque
+# clone du dépôt pour toujours. Seul le PNG produit par `npm run build:map`
+# est versionné.
+public/map/*.svg

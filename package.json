@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "check": "node scripts/smoke.mjs",
+    "build:map": "node scripts/build-map.mjs",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist -b gh-pages -r https://github.com/TheBllazer/LSSD.git -m \"Deploiement LSSD RMS\"",
     "rules:deploy": "npx --yes firebase-tools deploy --only firestore:rules,firestore:indexes",
@@ -40,11 +41,13 @@
     "firebase": "^12.4.0",
     "framer-motion": "^12.23.24",
     "idb-keyval": "^6.2.2",
+    "leaflet": "^1.9.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.83.0",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.4",
     "zod": "^4.4.3"
   },
@@ -59,6 +62,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "gh-pages": "^6.3.0",
     "globals": "^16.4.0",
+    "sharp": "^0.35.3",
     "vite": "^7.1.9"
   },
   "engines": {

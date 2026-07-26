@@ -210,7 +210,7 @@ Le chemin est toujours `composant → hook → service → firebase/`.
 | 5 | Rapports et éditeur TipTap | ✅ livrée |
 | 6 | Casiers judiciaires | ✅ livrée |
 | 7 | Export PDF | ✅ livrée |
-| 8 | Carte interactive (SIG) | ⏳ |
+| 8 | Carte interactive (SIG) | ✅ livrée |
 | 9 | Agents et administration | ⏳ |
 | 10 | Tableau de bord, recherche globale, finitions | ⏳ |
 
