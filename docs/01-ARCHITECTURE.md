@@ -229,15 +229,36 @@ documents de révision, qui n'ont pas de champ `classification`.
 
 ---
 
-## 7. Contraintes GitHub Pages
+## 7. Contraintes d'hébergement statique
 
 | Sujet | Décision |
 |---|---|
-| Base URL | `vite.config.js` → `base: '/LSSD/'` (surchargée par `VITE_BASE_PATH`). |
+| Base URL | `vite.config.js` → `base: '/LSSD/'`, surchargée par `VITE_BASE_PATH`. Sous-chemin GitHub Pages : `/LSSD/`. Firebase Hosting ou domaine personnalisé : `/`. |
 | Routing | **`HashRouter`** : zéro configuration serveur, aucun 404 sur rafraîchissement / lien direct. Un `public/404.html` de secours est fourni pour un futur passage en `BrowserRouter`. |
-| Variables d'env | `VITE_FIREBASE_*` injectées au build par GitHub Actions (*Repository secrets*). La clé API Firebase est **publique par conception** — la sécurité repose sur les règles + App Check. |
+| Variables d'env | `VITE_FIREBASE_*` lues dans `.env.local` **au moment du build**, sur le poste qui déploie. La clé API Firebase est **publique par conception** — la sécurité repose sur les règles + App Check. |
 | Assets | Toujours via `import` ou `import.meta.env.BASE_URL`, jamais de chemin absolu `/img/...`. |
-| Déploiement | Workflow `deploy.yml` : `npm ci` → `npm run build` → `actions/deploy-pages`. |
+| Déploiement | Deux scripts Node autonomes, sans dépendance : `deploy-hosting.mjs` (Firebase Hosting) et `deploy-pages.mjs` (branche `gh-pages`, en git ordinaire). |
+
+### 7 bis. `public/` est publié intégralement
+
+Vite recopie **tout** le contenu de `public/` dans `dist/`, sans exception
+possible fichier par fichier. Un fichier de travail laissé là part donc en
+production à chaque déploiement — et comme il est le plus souvent ignoré par
+Git, aucun `git status`, aucune revue de diff ne le signale.
+
+Le cas s'est produit avec le SVG source du fond de carte : 63 Mo poussés à
+chaque tentative de déploiement, pour une image dont seule la version PNG
+rastérisée (1,5 Mo) est réellement utilisée par l'application.
+
+Deux mesures :
+
+* le SVG source vit dans **`map-source/`**, hors de `public/` ; `npm run build:map`
+  refuse de s'exécuter s'il le retrouve à l'ancien emplacement ;
+* les deux scripts de déploiement **refusent de publier** un `dist/` contenant
+  un fichier de plus de 20 Mo, en nommant le coupable.
+
+> Règle générale : `public/` ne contient que ce qui doit être servi tel quel au
+> navigateur. Tout fichier source, intermédiaire ou de travail va ailleurs.
 
 ---
 

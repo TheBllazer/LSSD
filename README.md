@@ -84,6 +84,20 @@ npm run build
 régression passerait inaperçue : une recherche qui ne trouve plus rien, ou un
 rôle qui gagne un droit qu'il ne devrait pas avoir.
 
+### 6. Fond de carte
+
+Le fond de carte servi à l'application est `public/map/los-santos.png`, versionné.
+Il est produit à partir du SVG source — 63 Mo de tracés vectoriels — placé dans
+`map-source/MAP.svg`, **ignoré par Git** :
+
+```bash
+npm run build:map
+```
+
+> `map-source/` est volontairement **hors de `public/`** : Vite recopie tout le
+> contenu de `public/` dans `dist/`, donc un fichier de travail laissé là serait
+> publié à chaque déploiement sans jamais apparaître dans un `git status`.
+
 ---
 
 ## Déploiement des règles Firestore
@@ -105,59 +119,91 @@ dessus.
 
 ---
 
-## Déploiement GitHub Pages
+## Déploiement
 
-Le déploiement est **manuel et local** : le build est produit sur le poste puis
-publié sur la branche `gh-pages`, prise en charge par le déployeur natif de
-GitHub Pages. Aucune intégration continue n'est utilisée.
+Le déploiement est **manuel et local** : le build est produit sur le poste, à
+partir de `.env.local`, puis envoyé chez l'hébergeur. Aucune intégration
+continue, **aucune dépendance de déploiement** — les deux scripts n'utilisent
+que `git` et `firebase-tools`.
 
-1. **Settings → Pages → Source : Deploy from a branch → `gh-pages` / `(root)`**
-2. Renseigner `.env.local` — les clés Firebase sont lues au moment du build
-3. Publier :
+### Firebase Hosting *(voie recommandée)*
 
 ```bash
 npm run deploy
 ```
 
-> ⚠️ Cette commande **remplace intégralement** le contenu de la branche
-> `gh-pages`, y compris le fichier `CNAME` qui porte le domaine personnalisé.
-> À n'exécuter qu'en connaissance de cause.
+Le projet Firebase porte déjà Firestore et Authentication ; l'hébergement
+statique est compris dans le forfait gratuit et ne dépend **ni de GitHub, ni
+d'une quelconque facturation GitHub**.
 
-### État actuel de la publication
+Le site est servi à la racine (`https://<projet>.web.app/`), donc le bundle est
+compilé avec `base = '/'` : le script force cette valeur dans l'environnement du
+build, `.env.local` n'a pas à être modifié.
 
-**GitHub Pages ne publie plus rien sur ce compte.** Constats au 25/07/2026 :
+Prérequis, une seule fois sur le poste :
 
-- `https://thebllazer.github.io/LSSD/` et `https://lssd.thebllazer.fr/`
-  répondent tous deux **404** ;
-- le dernier déploiement Pages enregistré date du **15/07/2026** ;
-- les exécutions GitHub Actions échouent avec
-  *« your account is locked due to a billing issue »*.
+```bash
+npx --yes firebase-tools login
+```
 
-Le déployeur natif de la branche `gh-pages` (`pages build and deployment`) est
-lui aussi une exécution Actions : il est soumis au même verrou. **Tant que la
-situation de facturation n'est pas régularisée, `npm run deploy` poussera bien
-la branche, mais rien ne sera mis en ligne.**
+Les domaines `*.web.app` et `*.firebaseapp.com` du projet sont autorisés
+d'office par Firebase Authentication : rien à configurer côté connexion.
 
-La version précédente de l'application reste intacte sur la branche
-`legacy-mdt`, et son build sur `gh-pages`.
+### GitHub Pages *(voie alternative)*
 
-*Un workflow GitHub Actions avait été mis en place puis retiré ; il reste
-récupérable dans l'historique Git si la facturation est rétablie.*
+```bash
+npm run deploy:pages
+```
 
-### Chemin de base et domaine
+Build, puis publication de `dist/` sur la branche `gh-pages` **en git
+ordinaire**, dans un *worktree* supprimé en fin d'exécution. Pour voir ce qui
+serait publié sans rien pousser :
 
-Le chemin de base est piloté par `VITE_BASE_PATH` :
+```bash
+npm run deploy:pages -- --dry-run
+```
 
-| Cible | `VITE_BASE_PATH` | Fichier `public/CNAME` |
+> ⚠️ Le contenu de la branche `gh-pages` est **intégralement remplacé**, y
+> compris un éventuel `CNAME`. Pour conserver un domaine personnalisé, placez le
+> `CNAME` dans `public/` : Vite le recopie alors dans `dist/` à chaque build.
+
+Cette voie suppose que **GitHub Pages soit activé** sur le dépôt
+(*Settings → Pages → Source : Deploy from a branch → `gh-pages` / `(root)`*),
+et que `VITE_BASE_PATH` corresponde à la cible :
+
+| Cible | `VITE_BASE_PATH` | `public/CNAME` |
 |---|---|---|
-| `https://<utilisateur>.github.io/LSSD/` | `/LSSD/` *(valeur actuelle)* | absent — et le domaine personnalisé doit être retiré des réglages Pages |
-| Domaine personnalisé (ex. `lssd.exemple.fr`) | `/` | présent, contenant le domaine |
+| `https://<utilisateur>.github.io/LSSD/` | `/LSSD/` *(valeur actuelle)* | absent — et le domaine personnalisé retiré des réglages Pages |
+| Domaine personnalisé (`lssd.exemple.fr`) | `/` | présent, contenant le domaine |
 
 Les deux sont exclusifs : un domaine personnalisé configuré dans les réglages
 Pages sert le site à la racine, ce qui casse un build compilé avec `/LSSD/`.
+Pensez alors à ajouter le domaine dans **Console Firebase → Authentication →
+Settings → Authorized domains**, sans quoi la connexion sera refusée.
 
-Enfin, **Console Firebase → Authentication → Settings → Authorized domains** :
-ajouter le domaine de publication, sans quoi la connexion sera refusée.
+### Pourquoi le paquet `gh-pages` a été retiré
+
+Il entretenait un clone du dépôt dans `node_modules/.cache/gh-pages` et le
+réutilisait d'un déploiement à l'autre. Ce cache se désynchronise (branche
+recréée, force-push, dépôt re-cloné), et le paquet masque alors l'erreur réelle
+derrière des messages sans rapport — *« Failed to get remote.origin.url »* étant
+le plus connu. `scripts/deploy-pages.mjs` fait le même travail sans conserver le
+moindre état entre deux exécutions.
+
+### État actuel de la publication
+
+**GitHub Pages est désactivé sur le dépôt** (`has_pages: false`) et les deux
+URL répondent **404**, constaté au 28/07/2026. Origine : les exécutions GitHub
+Actions échouent avec *« your account is locked due to a billing issue »*, et le
+déployeur natif de la branche `gh-pages` est lui aussi une exécution Actions.
+
+**Tant que la facturation n'est pas régularisée, `npm run deploy:pages` poussera
+la branche sans que rien ne soit mis en ligne.** C'est la raison pour laquelle
+Firebase Hosting est la voie par défaut.
+
+La version précédente de l'application reste intacte sur la branche
+`legacy-mdt`. *Un workflow GitHub Actions avait été mis en place puis retiré ;
+il reste récupérable dans l'historique Git.*
 
 ### Routage
 
@@ -171,7 +217,7 @@ hébergement statique sans réécriture d'URL.
 |---|---|
 | `main` | Réécriture en cours (Vite + React 19 + MUI) — ce dépôt |
 | `legacy-mdt` | Sauvegarde de la version précédente « LSSD Mobile Data Terminal » (Create React App), conservée intacte |
-| `gh-pages` | Build déployé de la version précédente |
+| `gh-pages` | Build publié — porte encore celui de la version précédente tant que `npm run deploy:pages` n'a pas été lancé |
 
 ---
 

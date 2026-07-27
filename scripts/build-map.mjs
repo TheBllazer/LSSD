@@ -9,6 +9,10 @@
  * suffisante pour un zoom confortable. Seul le PNG est versionné ; le SVG
  * reste sur le poste de celui qui régénère la carte.
  *
+ * Le SVG source vit dans `map-source/`, **hors de `public/`** : tout ce que
+ * contient `public/` est recopié tel quel dans `dist/` par Vite, et se
+ * retrouverait donc publié à chaque déploiement.
+ *
  * Exécution : `npm run build:map`
  */
 
@@ -18,8 +22,19 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = path.dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
-const source = path.join(root, 'public', 'map', 'MAP.svg');
+const source = path.join(root, 'map-source', 'MAP.svg');
 const target = path.join(root, 'public', 'map', 'los-santos.png');
+
+/** Emplacement historique, à l'intérieur du dossier publié. */
+const legacySource = path.join(root, 'public', 'map', 'MAP.svg');
+
+if (existsSync(legacySource)) {
+  console.error(
+    `Le SVG source se trouve dans public/map/ : il serait publié tel quel (63 Mo).\n` +
+      `Déplacez-le :\n  mv public/map/MAP.svg map-source/MAP.svg`,
+  );
+  process.exit(1);
+}
 
 /** Largeur de rendu. 3000 px offre un zoom net sans dépasser ~6 Mo. */
 const WIDTH = 3000;
@@ -27,7 +42,7 @@ const WIDTH = 3000;
 if (!existsSync(source)) {
   console.error(
     `Fond de carte introuvable : ${source}\n` +
-      "Déposez le SVG source dans public/map/ puis relancez la commande.",
+      "Déposez le SVG source dans map-source/ puis relancez la commande.",
   );
   process.exit(1);
 }
