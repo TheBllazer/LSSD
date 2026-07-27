@@ -172,7 +172,7 @@ parcours complet sans rechargement de page, aucun avertissement console.
 | 7 | PDF | ✅ livrée — aperçu et journalisation vérifiés |
 | 8 | Carte SIG | ✅ livrée — fond et canevas vérifiés |
 | 9 | Agents & admin | ✅ livrée |
-| 10 | Dashboard, recherche, finitions | ⏳ |
+| 10 | Dashboard, recherche, finitions | ✅ livrée |
 
 **Extensions envisageables après la phase 10** (hors périmètre actuel) : mandats
 d'arrêt & BOLO dédiés, module CAD (dispatch temps réel), gestion des scellés,

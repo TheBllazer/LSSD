@@ -181,6 +181,36 @@ Composant  ──useCitizens()──►  TanStack Query
 
 ---
 
+## 4 bis. Les règles ne sont pas des filtres
+
+Piège rencontré **trois fois** pendant le développement (rapports, carte,
+casiers) : une règle Firestore qui teste un champ du document
+(`resource.data.classification`, `resource.data.visibility`) fonctionne
+parfaitement en lecture unitaire, mais **fait échouer une requête de liste
+entière**. Firestore n'exécute pas la règle document par document pour filtrer
+le résultat : il exige de pouvoir *prouver à l'avance* que la requête ne
+retournera que des documents autorisés. Faute de quoi, il refuse tout.
+
+La contrainte doit donc être portée par la requête elle-même :
+
+| Situation | Règle | Requête obligatoire |
+|---|---|---|
+| Confidentialité des rapports | `resource.data.classification` | `where('classification', 'in', visibleClassifications(level))` |
+| Portée des entités de carte | `visibility` **ou** `createdBy` | deux requêtes distinctes, fusionnées côté client |
+
+Le second cas est instructif : un « ou » entre deux champs n'est pas exprimable
+en une seule requête Firestore. Il faut deux requêtes prouvables et une fusion
+par identifiant — pas une règle plus permissive.
+
+**Corollaire pour les phases futures** : toute règle qui inspecte
+`resource.data.<champ>` impose un filtre correspondant dans le service, sans
+quoi le registre concerné sera inutilisable dès la première fiche créée.
+
+Autre piège de la même famille : une règle qui lit un champ **absent** du
+document échoue au lieu de retourner `null`. C'est ce qui cassait
+l'enregistrement des rapports — `canReadReport()` était appliquée aux
+documents de révision, qui n'ont pas de champ `classification`.
+
 ## 5. Sécurité applicative (couche client)
 
 1. `AuthContext` charge `agents/{uid}` + `permissions/{uid}` à la connexion.

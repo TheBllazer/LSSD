@@ -1,20 +1,19 @@
 import { useLocation } from 'react-router-dom';
 import { Box, Stack, Typography, Tooltip } from '@mui/material';
-import { MdChevronRight } from 'react-icons/md';
+import { MdChevronRight, MdSearch } from 'react-icons/md';
 import { ALL_NAV } from '@/app/config/navigation';
 import { env } from '@/app/config/env';
 import TopProgressBar from '@/components/feedback/TopProgressBar';
 import UserMenu from './UserMenu';
+import { KbdCombo } from '@/components/system';
 
 /**
- * Barre supérieure : identité de l'agence, localisation dans l'application et
- * menu de l'agent connecté.
+ * Barre supérieure : identité de l'agence, localisation dans l'application,
+ * recherche globale et menu de l'agent connecté.
  *
- * La recherche globale Ctrl+K et le centre de notifications viendront s'insérer
- * ici en phase 10 : aucun élément décoratif non fonctionnel n'est affiché
- * avant d'être opérationnel.
+ * @param {{ onOpenSearch: () => void }} props
  */
-export default function Navbar() {
+export default function Navbar({ onOpenSearch }) {
   const location = useLocation();
 
   const current = ALL_NAV.find(
@@ -84,6 +83,33 @@ export default function Navbar() {
       </Stack>
 
       <Box sx={{ flex: 1 }} />
+
+      {/* Déclencheur de la recherche globale — le raccourci reste la voie
+          principale, mais il doit être découvrable. */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1}
+        onClick={onOpenSearch}
+        sx={{
+          px: 1.25,
+          py: 0.5,
+          minWidth: 240,
+          borderRadius: '3px',
+          cursor: 'pointer',
+          border: '1px solid',
+          borderColor: 'var(--line)',
+          bgcolor: 'var(--navy-850)',
+          transition: 'border-color 140ms ease',
+          '&:hover': { borderColor: 'primary.main' },
+        }}
+      >
+        <MdSearch size={15} color="var(--muted-dim)" />
+        <Typography sx={{ fontSize: 11.5, color: 'text.disabled', flex: 1 }}>
+          Rechercher une fiche…
+        </Typography>
+        <KbdCombo combo="Ctrl+K" />
+      </Stack>
 
       <Tooltip title={`Version ${env.app.version} · ${env.mode}`}>
         <Typography

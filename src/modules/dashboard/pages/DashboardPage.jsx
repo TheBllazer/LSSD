@@ -7,7 +7,10 @@ import {
   MdShield,
   MdGroups,
 } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 import ModuleLayout from '@/layouts/ModuleLayout';
+import KpiRow from '../components/KpiRow';
+import { useDashboardStats } from '@/hooks/data/useDashboardStats';
 import { Panel, KeyValueRow, StatusChip, KbdCombo } from '@/components/system';
 import Avatar from '@/components/media/Avatar';
 import useAuth from '@/hooks/auth/useAuth';
@@ -28,7 +31,17 @@ import { DIVISION_LABELS, RANK_LABELS } from '@/types/agents';
  * Modules effectivement livrés.
  * Mis à jour à chaque phase — voir `docs/06-ROADMAP.md`.
  */
-const DELIVERED_MODULES = new Set(['dashboard', 'citizens', 'vehicles', 'weapons']);
+const DELIVERED_MODULES = new Set([
+  'dashboard',
+  'citizens',
+  'vehicles',
+  'weapons',
+  'reports',
+  'records',
+  'map',
+  'agents',
+  'admin',
+]);
 
 /**
  * Ligne d'état d'un sous-système, avec pastille de validité.
@@ -57,13 +70,15 @@ function SystemRow({ label, ok, value }) {
 /**
  * Tableau de bord.
  *
- * Il rend compte de l'état réel de la session : identité de service,
- * habilitations effectives, agents connectés, état du terminal. Les indicateurs
- * métier — compteurs de fiches, graphiques d'activité, derniers rapports — sont
- * branchés en phase 10, une fois les registres alimentés.
+ * Compteurs du service, identité de session, habilitations effectives et
+ * agents connectés. Les compteurs proviennent du document d'agrégats tenu à
+ * jour de façon atomique par la couche de données : une seule lecture, jamais
+ * de recalcul à l'affichage.
  */
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { agent, role, abilities } = useAuth();
+  const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { agents: onlineAgents, count: onlineCount } = useOnlineAgents();
   const configured = isFirebaseConfigured();
   const { granted, revoked } = diffFromRole(role, abilities);
@@ -74,6 +89,13 @@ export default function DashboardPage() {
       icon={<MdSpaceDashboard />}
       subtitle={env.app.agency}
     >
+      <KpiRow
+        stats={stats}
+        loading={statsLoading}
+        onlineCount={onlineCount}
+        onNavigate={navigate}
+      />
+
       <Box
         sx={{
           display: 'grid',
@@ -283,8 +305,8 @@ export default function DashboardPage() {
             {[
               ['Ctrl+B', 'Replier / déplier la barre latérale'],
               ['Ctrl+1…9', 'Accès direct à un module'],
-              ['Ctrl+K', 'Recherche globale (phase 10)'],
-              ['Ctrl+S', 'Enregistrer la fiche courante (phase 3)'],
+              ['Ctrl+K', 'Recherche globale'],
+              ['Ctrl+W', "Fermer l'onglet courant"],
             ].map(([combo, description]) => (
               <Stack key={combo} direction="row" alignItems="center" spacing={1.25}>
                 <Box sx={{ width: 92, flexShrink: 0 }}>

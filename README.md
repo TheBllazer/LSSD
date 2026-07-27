@@ -212,7 +212,7 @@ Le chemin est toujours `composant → hook → service → firebase/`.
 | 7 | Export PDF | ✅ livrée |
 | 8 | Carte interactive (SIG) | ✅ livrée |
 | 9 | Agents et administration | ✅ livrée |
-| 10 | Tableau de bord, recherche globale, finitions | ⏳ |
+| 10 | Tableau de bord, recherche globale, finitions | ✅ livrée |
 
 Détail et critères d'acceptation : [docs/06-ROADMAP.md](docs/06-ROADMAP.md).
 
@@ -224,5 +224,5 @@ Détail et critères d'acceptation : [docs/06-ROADMAP.md](docs/06-ROADMAP.md).
 |---|---|
 | `Ctrl` + `B` | Replier / déplier la barre latérale |
 | `Ctrl` + `1…9` | Accès direct à un module |
-| `Ctrl` + `K` | Recherche globale *(phase 10)* |
-| `Ctrl` + `S` | Enregistrer la fiche courante *(phase 3)* |
+| `Ctrl` + `K` | Recherche globale (Spotlight) |
+| `Ctrl` + `W` | Fermer l'onglet courant |

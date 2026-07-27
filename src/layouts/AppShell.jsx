@@ -1,4 +1,4 @@
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import {
@@ -11,6 +11,7 @@ import {
 import Navbar from '@/components/navigation/Navbar';
 import Sidebar from '@/components/navigation/Sidebar';
 import TabBar from '@/components/navigation/TabBar';
+import CommandPalette from '@/components/search/CommandPalette';
 import { StatusBar, StatusItem, StatusSpacer } from '@/components/system';
 import ErrorBoundary from '@/components/feedback/ErrorBoundary';
 import ModuleSkeleton from '@/components/feedback/ModuleSkeleton';
@@ -39,6 +40,7 @@ export default function AppShell() {
   const { agent, role, abilities } = useAuth();
   const { tabs, activeKey, closeTab } = useWorkspace();
   const { count: onlineCount } = useOnlineAgents();
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage(
     STORAGE_KEYS.SIDEBAR_COLLAPSED,
     false,
@@ -53,6 +55,7 @@ export default function AppShell() {
   const hotkeys = useMemo(() => {
     const bindings = {
       'ctrl+b': () => setSidebarCollapsed((value) => !value),
+      'ctrl+k': () => setPaletteOpen(true),
       'ctrl+w': () => {
         if (activeKey) closeTab(activeKey);
       },
@@ -69,7 +72,7 @@ export default function AppShell() {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Navbar />
+      <Navbar onOpenSearch={() => setPaletteOpen(true)} />
 
       <Box sx={{ flex: 1, display: 'flex', minHeight: 0 }}>
         <Sidebar
@@ -104,6 +107,8 @@ export default function AppShell() {
           </ErrorBoundary>
         </Box>
       </Box>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
 
       <StatusBar>
         <StatusItem icon={<MdCircle size={8} />} color="var(--ok)" tooltip="État du terminal">
