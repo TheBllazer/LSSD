@@ -45,6 +45,24 @@
         pointer-events: none;
       }
 
+      #boot-failure {
+        display: none;
+        max-width: 420px;
+        text-align: center;
+        line-height: 1.7;
+        letter-spacing: 0.04em;
+        text-transform: none;
+        color: #c98a8a;
+      }
+
+      #boot.stalled .bar {
+        display: none;
+      }
+
+      #boot.stalled #boot-failure {
+        display: block;
+      }
+
       #boot .bar {
         width: 240px;
         height: 2px;
@@ -76,8 +94,28 @@
     <div id="boot">
       <div>Los Santos Sheriff's Department</div>
       <div class="bar"><span></span></div>
-      <div>Initialisation du terminal</div>
+      <div id="boot-message">Initialisation du terminal</div>
+      <div id="boot-failure">
+        Le terminal n'a pas démarré. Vérifiez votre connexion réseau, puis
+        rechargez la page. Si le problème persiste, videz le cache du navigateur
+        (Ctrl + Maj + R).
+      </div>
     </div>
+
+    <script>
+      /*
+       * Filet de sécurité : le voile est retiré par React (cf. src/app/bootSplash.js).
+       * S'il est toujours là au bout de 20 secondes, c'est que le bundle n'a pas
+       * pu être chargé ou exécuté — un voile opaque et muet serait alors le pire
+       * des retours possibles. On l'assume explicitement.
+       */
+      setTimeout(function () {
+        var boot = document.getElementById('boot');
+        if (!boot || boot.classList.contains('hidden')) return;
+        boot.classList.add('stalled');
+        document.getElementById('boot-message').textContent = 'Échec du démarrage';
+      }, 20000);
+    </script>
 
     <noscript>
       <div style="padding: 32px; font-family: sans-serif">

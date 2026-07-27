@@ -8,7 +8,10 @@ import '@/utils/dates'; // Charge la locale française et les plugins dayjs
  * Point d'entrée du terminal LSSD RMS.
  *
  * L'écran d'amorçage inséré dans `index.html` reste visible jusqu'au premier
- * rendu de React, puis disparaît en fondu : aucune transition blanche.
+ * rendu de React, puis disparaît en fondu : aucune transition blanche. Son
+ * retrait est déclenché par l'effet de montage de `App` (cf. `app/bootSplash.js`)
+ * et non depuis ce fichier — un rappel posé ici ne saurait pas quand React a
+ * réellement affiché quelque chose.
  */
 
 const container = document.getElementById('root');
@@ -21,11 +24,3 @@ createRoot(container).render(
     <App />
   </StrictMode>,
 );
-
-/** Retire l'écran d'amorçage HTML une fois l'application montée. */
-requestAnimationFrame(() => {
-  const boot = document.getElementById('boot');
-  if (!boot) return;
-  boot.classList.add('hidden');
-  setTimeout(() => boot.remove(), 240);
-});
