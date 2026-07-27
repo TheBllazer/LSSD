@@ -146,6 +146,12 @@ Prérequis, une seule fois sur le poste :
 npx --yes firebase-tools login
 ```
 
+Pour construire et vérifier le bundle sans rien mettre en ligne :
+
+```bash
+npm run deploy:hosting -- --dry-run
+```
+
 Les domaines `*.web.app` et `*.firebaseapp.com` du projet sont autorisés
 d'office par Firebase Authentication : rien à configurer côté connexion.
 

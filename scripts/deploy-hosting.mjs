@@ -14,24 +14,43 @@
  * Prérequis : `npx firebase-tools login` une fois sur le poste.
  *
  * Exécution : `npm run deploy:hosting`
+ *             `npm run deploy:hosting -- --dry-run`  (tout sauf la mise en ligne)
  */
 
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { root, run, capture, fail, step, assertNoHugeAssets } from './lib/run.mjs';
+import { root, run, fail, step, assertNoHugeAssets } from './lib/run.mjs';
 
 const DIST = path.join(root, 'dist');
+const RC = path.join(root, '.firebaserc');
+
+/** `--dry-run` : le bundle est construit et vérifié, mais rien n'est mis en ligne. */
+const dryRun = process.argv.includes('--dry-run');
 
 // ── 0. Cible ──────────────────────────────────────────────────────────────
-const rc = capture('node', [
-  '-e',
-  "process.stdout.write(require('./.firebaserc').projects.default)",
-]);
-if (!rc.ok || !rc.out) {
-  fail("Projet Firebase introuvable : renseignez `projects.default` dans .firebaserc.");
+/**
+ * Identifiant du projet Firebase.
+ *
+ * `.firebaserc` est du JSON, mais sans extension : `require` ne saurait pas
+ * quel analyseur lui appliquer. On le lit donc à la main.
+ */
+function readProjectId() {
+  if (!existsSync(RC)) {
+    fail(`.firebaserc est absent. Créez-le :\n\n  { "projects": { "default": "<id-du-projet>" } }`);
+  }
+  try {
+    const id = JSON.parse(readFileSync(RC, 'utf8'))?.projects?.default;
+    if (!id) fail('`projects.default` est absent de .firebaserc.');
+    return id;
+  } catch (error) {
+    return fail(`.firebaserc est illisible : ${error.message}`);
+  }
 }
-console.log(`Projet Firebase : ${rc.out}`);
-console.log(`Cible           : https://${rc.out}.web.app/`);
+
+const projectId = readProjectId();
+console.log(`Projet Firebase : ${projectId}`);
+console.log(`Cible           : https://${projectId}.web.app/`);
+if (dryRun) console.log('Mode            : simulation (aucune mise en ligne)');
 
 // ── 1. Build à la racine ──────────────────────────────────────────────────
 step("Construction du bundle (base « / »)");
@@ -47,13 +66,23 @@ if (!existsSync(path.join(DIST, 'index.html'))) {
 assertNoHugeAssets(DIST);
 
 // ── 2. Publication ────────────────────────────────────────────────────────
+if (dryRun) {
+  const base = readFileSync(path.join(DIST, 'index.html'), 'utf8').match(
+    /<script[^>]+src="([^"]+)"/,
+  );
+  step('Simulation');
+  console.log(`Bundle prêt dans dist/, point d'entrée : ${base?.[1] ?? '(introuvable)'}`);
+  console.log('La mise en ligne est omise.\n');
+  process.exit(0);
+}
+
 step('Envoi vers Firebase Hosting');
 console.log(
   "Si la commande réclame une authentification : `npx --yes firebase-tools login`.\n",
 );
-run('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting']);
+run('npx', ['--yes', 'firebase-tools', 'deploy', '--only', 'hosting', '--project', projectId]);
 
-console.log(`\n✔ En ligne sur https://${rc.out}.web.app/`);
+console.log(`\n✔ En ligne sur https://${projectId}.web.app/`);
 console.log(
   "\nLes domaines `*.web.app` et `*.firebaseapp.com` du projet sont autorisés\n" +
     "d'office par Firebase Authentication : aucune configuration supplémentaire.",
