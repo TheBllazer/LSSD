@@ -260,6 +260,32 @@ Deux mesures :
 > Règle générale : `public/` ne contient que ce qui doit être servi tel quel au
 > navigateur. Tout fichier source, intermédiaire ou de travail va ailleurs.
 
+### 7 ter. Le document HTML ne doit jamais être mis en cache
+
+Les noms des fichiers de `assets/` portent une empreinte de leur contenu : ils
+peuvent être mis en cache pour un an sans risque, puisqu'un changement produit
+un nouveau nom. **Le document HTML, lui, garde toujours la même adresse** — il
+est le seul point d'entrée, et c'est lui qui désigne les bundles à charger.
+Mis en cache, il continue de réclamer les anciens : un déploiement pourtant
+correct semble alors n'avoir aucun effet, parfois pendant des heures.
+
+Deux pièges se sont conjugués sur Firebase Hosting :
+
+* les règles `headers` sont évaluées sur le **chemin demandé**, jamais sur la
+  destination de la réécriture. Une règle posée sur `/index.html` ne couvre donc
+  pas `/`, que demandent pourtant tous les visiteurs ;
+* `/` retombait de ce fait sur le défaut de Firebase, `max-age=3600` — une heure
+  de HTML figé, sans revalidation.
+
+Les `source` de `firebase.json` sont désormais **disjointes** : `/assets/**`,
+`/map/**` et `/brand/**` en cache long, `/` et `**/*.html` en `no-cache`. Aucune
+requête ne peut correspondre à deux règles, donc aucun ordre de priorité à
+deviner.
+
+> Symptôme à reconnaître : `curl` sur le site renvoie la bonne version, le
+> navigateur non. Comparer le nom du bundle servi par chacun tranche
+> immédiatement — et `Ctrl + Maj + R` confirme le diagnostic.
+
 ---
 
 ## 8. Découpage du bundle

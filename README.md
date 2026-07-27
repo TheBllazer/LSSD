@@ -155,6 +155,17 @@ npm run deploy:hosting -- --dry-run
 Les domaines `*.web.app` et `*.firebaseapp.com` du projet sont autorisés
 d'office par Firebase Authentication : rien à configurer côté connexion.
 
+> **Un déploiement semble sans effet ?** Comparez le bundle servi par le serveur
+> et celui que charge le navigateur :
+>
+> ```bash
+> curl -s https://lssd-rms.web.app/ | grep -o 'index-[A-Za-z0-9_-]*\.js'
+> ```
+>
+> S'ils diffèrent, c'est le cache du navigateur : `Ctrl + Maj + R`. Les en-têtes
+> de `firebase.json` interdisent la mise en cache du HTML précisément pour que
+> ce cas ne se produise plus (cf. `01-ARCHITECTURE.md` §7 ter).
+
 ### GitHub Pages *(voie alternative)*
 
 ```bash

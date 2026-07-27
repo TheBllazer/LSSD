@@ -6,8 +6,8 @@
   "hosting": {
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "cleanUrls": true,
     "rewrites": [{ "source": "**", "destination": "/index.html" }],
+
     "headers": [
       {
         "source": "/assets/**",
@@ -17,13 +17,19 @@
       },
       {
         "source": "/map/**",
-        "headers": [
-          { "key": "Cache-Control", "value": "public, max-age=604800" }
-        ]
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
       },
       {
-        "source": "/index.html",
-        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+        "source": "/brand/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+      },
+      {
+        "source": "/",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache, max-age=0" }]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache, max-age=0" }]
       }
     ]
   },
