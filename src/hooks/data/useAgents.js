@@ -12,7 +12,9 @@ import {
   savePermissions,
   setAccountDisabled,
   sendPasswordReset,
+  changeOwnPassword,
 } from '@/services/agents.service';
+import { describeAuthError } from '@/firebase/auth';
 import { CACHE } from '@/app/config/constants';
 
 /**
@@ -90,12 +92,14 @@ export function useCreateAgent() {
   const actor = useActor();
 
   return useMutation({
-    mutationFn: ({ profile, password }) => createAgentAccount({ profile, password, actor }),
+    mutationFn: ({ profile, password, sendResetEmail }) =>
+      createAgentAccount({ profile, password, sendResetEmail, actor }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.all });
-      toast.success(
-        'Compte créé. Un courriel de définition du mot de passe a été envoyé à l\'agent.',
-      );
+      // Le détail des identifiants est affiché par la fenêtre de création, qui
+      // reste ouverte : un toast fugace serait le pire endroit pour un mot de
+      // passe que l'on ne pourra plus relire.
+      toast.success('Compte créé.');
     },
   });
 }
@@ -155,5 +159,24 @@ export function useSendPasswordReset() {
   return useMutation({
     mutationFn: (email) => sendPasswordReset(email),
     onSuccess: () => toast.success('Courriel de réinitialisation envoyé.'),
+  });
+}
+
+/**
+ * Changement de son propre mot de passe.
+ *
+ * Seule voie disponible sans serveur : le SDK client ne peut modifier que le
+ * compte courant. L'erreur est remontée telle quelle à l'appelant, qui
+ * l'affiche dans la fenêtre — un mot de passe actuel erroné est une correction
+ * à faire sur place, pas une notification à laisser passer.
+ */
+export function useChangeOwnPassword() {
+  return useMutation({
+    mutationFn: ({ currentPassword, newPassword }) =>
+      changeOwnPassword(currentPassword, newPassword),
+    onSuccess: () => toast.success('Mot de passe modifié.'),
+    onError: (error) => {
+      error.friendlyMessage = describeAuthError(error);
+    },
   });
 }

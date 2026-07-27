@@ -15,7 +15,7 @@ import {
   requireDb,
 } from '@/firebase/db';
 import { COLLECTIONS } from '@/firebase/paths';
-import { getProvisioningAuth, sendPasswordReset } from '@/firebase/auth';
+import { getProvisioningAuth, sendPasswordReset, changeOwnPassword } from '@/firebase/auth';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { buildPermissionDocument } from '@/utils/permissions';
 import { buildSearchTokens } from '@/utils/tokens';
@@ -127,16 +127,28 @@ export async function touchLastLogin(uid) {
  * l'utilisateur créé, ce qui déconnecterait l'administrateur s'il utilisait
  * l'instance principale. L'instance secondaire est déconnectée aussitôt.
  *
- * Le mot de passe n'est jamais conservé : il est transmis à Firebase puis
- * oublié, et l'agent reçoit un courriel de réinitialisation.
+ * Le mot de passe est **défini par le commandement** et transmis à l'agent hors
+ * de l'application : les adresses de service ne correspondent à aucune boîte
+ * réelle, un courriel de réinitialisation n'arriverait donc nulle part. Il est
+ * transmis à Firebase puis oublié — jamais écrit dans Firestore, jamais versé
+ * au journal d'audit.
+ *
+ * L'envoi du courriel reste possible pour les rares adresses réelles, mais il
+ * doit être demandé explicitement.
  *
  * @param {object} params
- * @param {object} params.profile   Champs de la fiche agent
- * @param {string} params.password  Mot de passe provisoire
+ * @param {object} params.profile           Champs de la fiche agent
+ * @param {string} params.password          Mot de passe initial choisi par l'administrateur
+ * @param {boolean} [params.sendResetEmail] Envoyer en plus un courriel de réinitialisation
  * @param {object} params.actor
  * @returns {Promise<{uid: string}>}
  */
-export async function createAgentAccount({ profile, password, actor }) {
+export async function createAgentAccount({
+  profile,
+  password,
+  sendResetEmail = false,
+  actor,
+}) {
   const provisioningAuth = getProvisioningAuth();
 
   const credential = await createUserWithEmailAndPassword(
@@ -200,9 +212,11 @@ export async function createAgentAccount({ profile, password, actor }) {
   );
   await batch.commit();
 
-  // L'agent définit lui-même son mot de passe : celui saisi ici ne sert qu'à
-  // créer le compte et n'est communiqué à personne.
-  await sendPasswordReset(agent.email).catch(() => {});
+  // Uniquement si l'adresse est réelle : sinon le courriel part dans le vide et
+  // l'échec, silencieux, laisserait croire qu'une consigne a été transmise.
+  if (sendResetEmail) {
+    await sendPasswordReset(agent.email).catch(() => {});
+  }
 
   return { uid };
 }
@@ -309,4 +323,4 @@ export async function setAccountDisabled({ uid, disabled, permissions, actor }) 
   );
 }
 
-export { sendPasswordReset };
+export { sendPasswordReset, changeOwnPassword };

@@ -11,6 +11,7 @@
 
 import * as tokens from '../src/utils/tokens.js';
 import * as permissions from '../src/utils/permissions.js';
+import * as password from '../src/utils/password.js';
 
 let failures = 0;
 
@@ -173,6 +174,40 @@ const difference = permissions.diffFromRole(
 );
 check('ecart au role : permissions accordees', difference.granted, ['reports.validate']);
 check('ecart au role : permissions retirees', difference.revoked, ['citizens.update']);
+
+console.log('\n--- Mots de passe de service ---');
+
+const generated = Array.from({ length: 200 }, () => password.generatePassword());
+
+check('longueur : 3 groupes de 4 separes par un tiret', generated[0].length, 14);
+check('format des groupes', /^[^-]{4}-[^-]{4}-[^-]{4}$/.test(generated[0]), true);
+check(
+  'aucun caractere confondable (O 0 I l 1)',
+  generated.every((value) => !/[O0Il1]/.test(value)),
+  true,
+);
+check(
+  'tous acceptes par la validation',
+  generated.every((value) => password.validatePassword(value).ok),
+  true,
+);
+check(
+  'aucune collision sur 200 tirages',
+  new Set(generated).size,
+  200,
+);
+
+check('validation : chaine vide refusee', password.validatePassword('').ok, false);
+check('validation : 7 caracteres refuses', password.validatePassword('abcdefg').ok, false);
+check('validation : 8 caracteres acceptes', password.validatePassword('abcdefgh').ok, true);
+check(
+  'validation : espace en fin refuse',
+  password.validatePassword('abcdefgh ').ok,
+  false,
+);
+
+check('robustesse : trop court', password.passwordStrength('abc').score, 0);
+check('robustesse : long et varie', password.passwordStrength('k7Fq-9mXt-2Rvb').score, 3);
 
 console.log(
   failures === 0

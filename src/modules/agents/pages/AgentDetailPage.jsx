@@ -9,6 +9,7 @@ import {
   MdBlock,
   MdCheckCircle,
   MdLockReset,
+  MdVpnKey,
 } from 'react-icons/md';
 import RecordLayout from '@/layouts/RecordLayout';
 import Avatar from '@/components/media/Avatar';
@@ -20,6 +21,7 @@ import EmptyState from '@/components/data/EmptyState';
 import TableSkeleton from '@/components/data/TableSkeleton';
 import Can from '@/components/auth/Can';
 import PermissionsMatrix from '../components/PermissionsMatrix';
+import PasswordChangeDialog from '../components/PasswordChangeDialog';
 import {
   useAgent,
   useAgentPermissions,
@@ -56,6 +58,7 @@ export default function AgentDetailPage() {
   const { user, role: myRole } = useAuth();
 
   const [activeTab, setActiveTab] = useState('profile');
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   const canManagePermissions = usePermission(PERMISSIONS.ADMIN_PERMISSIONS);
 
@@ -129,8 +132,14 @@ export default function AgentDetailPage() {
   const resetPassword = async () => {
     const { confirmed } = await confirm({
       title: 'Réinitialiser le mot de passe',
-      message: `Un courriel sera envoyé à ${agent.email}. Le mot de passe actuel reste valide tant que l'agent n'en définit pas un nouveau.`,
-      confirmLabel: 'Envoyer',
+      message:
+        `Un courriel sera envoyé à ${agent.email}. Cela suppose que cette adresse ` +
+        `corresponde à une boîte réelle et relevée par l'agent — ce qui n'est pas ` +
+        `le cas des adresses de service fictives, où le message se perdra sans erreur.\n\n` +
+        `Le mot de passe actuel reste valide tant qu'un nouveau n'est pas défini. ` +
+        `Seul l'agent peut changer le sien depuis sa propre fiche ; le commandement ` +
+        `ne peut le faire à sa place sans passer par la console Firebase.`,
+      confirmLabel: 'Envoyer quand même',
     });
     if (confirmed) sendReset.mutate(agent.email);
   };
@@ -283,11 +292,26 @@ export default function AgentDetailPage() {
             Annuaire
           </Button>
 
-          <Can do={PERMISSIONS.AGENTS_UPDATE}>
-            <Button variant="outlined" startIcon={<MdLockReset />} onClick={resetPassword}>
-              Mot de passe
+          {/*
+            Un agent change son propre mot de passe ; sur la fiche d'un autre,
+            le seul levier reste le courriel de réinitialisation — inopérant
+            avec une adresse de service fictive, ce que la confirmation dit.
+          */}
+          {isSelf ? (
+            <Button
+              variant="outlined"
+              startIcon={<MdVpnKey />}
+              onClick={() => setPasswordOpen(true)}
+            >
+              Changer mon mot de passe
             </Button>
-          </Can>
+          ) : (
+            <Can do={PERMISSIONS.AGENTS_UPDATE}>
+              <Button variant="outlined" startIcon={<MdLockReset />} onClick={resetPassword}>
+                Mot de passe
+              </Button>
+            </Can>
+          )}
 
           {!isSelf && (
             <Can do={PERMISSIONS.ADMIN_PERMISSIONS}>
@@ -320,6 +344,12 @@ export default function AgentDetailPage() {
       }
     >
       {renderTab()}
+
+      <PasswordChangeDialog
+        open={passwordOpen}
+        onClose={() => setPasswordOpen(false)}
+        email={agent.email}
+      />
     </RecordLayout>
   );
 }

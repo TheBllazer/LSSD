@@ -7,6 +7,9 @@ import {
   signInWithEmailAndPassword,
   signOut as fbSignOut,
   sendPasswordResetEmail,
+  reauthenticateWithCredential,
+  updatePassword,
+  EmailAuthProvider,
   onAuthStateChanged,
 } from 'firebase/auth';
 import { firebaseApp, requireApp, getProvisioningApp } from './app';
@@ -79,6 +82,33 @@ export async function sendPasswordReset(email) {
 }
 
 /**
+ * Change le mot de passe de l'agent connecté.
+ *
+ * Seule voie de changement disponible depuis un front statique : le SDK client
+ * ne peut modifier que le compte courant. Un administrateur ne peut pas
+ * réattribuer le mot de passe d'un autre agent — cela demanderait le SDK
+ * Admin, donc un serveur.
+ *
+ * Firebase exige une authentification récente avant toute modification
+ * sensible : on rejoue donc les identifiants actuels. C'est aussi ce qui
+ * empêche un poste laissé déverrouillé de servir à confisquer un compte.
+ *
+ * @param {string} currentPassword
+ * @param {string} newPassword
+ */
+export async function changeOwnPassword(currentPassword, newPassword) {
+  const instance = requireAuth();
+  const user = instance.currentUser;
+  if (!user) throw new Error('Aucune session active.');
+
+  await reauthenticateWithCredential(
+    user,
+    EmailAuthProvider.credential(user.email, currentPassword),
+  );
+  await updatePassword(user, newPassword);
+}
+
+/**
  * S'abonne aux changements d'état d'authentification.
  * @param {(user: import('firebase/auth').User | null) => void} callback
  * @returns {() => void} Fonction de désabonnement
@@ -121,6 +151,10 @@ export function describeAuthError(error) {
       return 'Cette adresse e-mail est déjà associée à un compte.';
     case 'auth/weak-password':
       return 'Mot de passe trop faible (8 caractères minimum).';
+    case 'auth/requires-recent-login':
+      return 'Session trop ancienne. Reconnectez-vous puis réessayez.';
+    case 'auth/missing-password':
+      return 'Mot de passe requis.';
     case 'auth/operation-not-allowed':
       return "L'authentification par e-mail n'est pas activée sur le projet Firebase.";
     case 'auth/configuration-not-found':
