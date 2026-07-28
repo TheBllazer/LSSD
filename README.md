@@ -57,6 +57,26 @@ d'inscription publique.
 > elle est incluse dans le bundle. La sécurité repose sur les règles Firestore
 > et App Check, pas sur le secret de cette clé.
 
+### 3 bis. Création de comptes et App Check
+
+Le réglage *Authentication → Settings → User actions → **Enable create (sign-up)***
+doit rester **coché**. Firebase ne sait pas réserver la création de comptes aux
+administrateurs : `createUserWithEmailAndPassword` est un appel non authentifié,
+sans appelant à inspecter. Le réglage est binaire.
+
+La porte est refermée autrement, par deux mécanismes que l'interface ne peut pas
+contourner : **App Check** rejette tout appel ne provenant pas de l'application
+déclarée, et un compte créé hors du terminal n'a **aucun document
+`/permissions/{uid}`** — il peut s'authentifier, et rien de plus.
+
+Mise en service d'App Check, dans l'ordre — l'inverse coupe l'accès à tout le
+monde : enregistrer l'application (reCAPTCHA v3), renseigner
+`VITE_RECAPTCHA_SITE_KEY`, **reconstruire et déployer**, vérifier que les
+requêtes attestées apparaissent dans les métriques, *puis seulement* activer
+l'enforcement sur Authentication et Firestore.
+
+Procédure détaillée : [docs/05-SECURITY-RULES.md](docs/05-SECURITY-RULES.md) §1 ter.
+
 ### 4. Développement
 
 ```bash

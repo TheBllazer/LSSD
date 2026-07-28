@@ -170,6 +170,15 @@ export function describeAuthError(error) {
       return 'Configuration Firebase Authentication introuvable pour ce projet.';
     case 'auth/unauthorized-domain':
       return "Ce domaine n'est pas autorisé dans les réglages Firebase Authentication.";
+    case 'auth/firebase-app-check-token-is-invalid':
+    case 'auth/invalid-app-credential':
+      // App Check est actif côté projet mais l'attestation a échoué : clé
+      // reCAPTCHA absente du build, domaine non déclaré, ou — en développement —
+      // jeton de debug non enregistré dans la console.
+      return (
+        "Attestation App Check refusée. Vérifiez VITE_RECAPTCHA_SITE_KEY dans le " +
+        'build, et que le domaine est déclaré dans Console Firebase → App Check.'
+      );
     default:
       // Le code inconnu est tracé : sans lui, diagnostiquer une erreur de
       // configuration du projet reviendrait à deviner.

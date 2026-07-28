@@ -27,6 +27,45 @@ function findApp(name) {
 }
 
 /**
+ * Active App Check sur une instance Firebase.
+ *
+ * App Check atteste que l'appel provient bien de **cette** application, et non
+ * d'un script tiers muni de la clé API — laquelle est publique par conception.
+ * C'est ce qui permet de laisser la création de comptes ouverte côté Firebase
+ * sans exposer une porte utilisable depuis l'extérieur.
+ *
+ * Point capital : App Check est attaché à une **instance**, pas au projet.
+ * L'instance secondaire qui provisionne les comptes doit donc être attestée
+ * elle aussi — sans quoi la création de comptes échouerait dès l'activation de
+ * l'enforcement, alors que tout le reste de l'application continuerait de
+ * fonctionner. C'est exactement le genre de panne qu'on ne relie pas à sa cause.
+ *
+ * Sans `VITE_RECAPTCHA_SITE_KEY`, on n'initialise rien : App Check est alors
+ * simplement inactif, ce qui reste valide tant que l'enforcement est désactivé
+ * dans la console.
+ *
+ * @param {import('firebase/app').FirebaseApp} app
+ */
+function attachAppCheck(app) {
+  if (!env.recaptchaSiteKey) return;
+
+  try {
+    if (env.isDev) {
+      // Jeton de debug affiché en console au premier lancement, à enregistrer
+      // dans Console Firebase → App Check → Applications. Sans lui, le poste de
+      // développement est rejeté dès que l'enforcement est actif.
+      self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(env.recaptchaSiteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (error) {
+    console.warn(`[LSSD] App Check non initialisé sur « ${app.name} » :`, error);
+  }
+}
+
+/**
  * Crée (ou réutilise) l'application Firebase principale.
  * @returns {import('firebase/app').FirebaseApp | null}
  */
@@ -42,24 +81,7 @@ function createPrimaryApp() {
   if (existing) return existing;
 
   const app = initializeApp(env.firebase, APP_NAME);
-
-  // App Check : protège l'API Firebase contre les usages depuis un autre front.
-  if (env.recaptchaSiteKey) {
-    try {
-      if (env.isDev) {
-        // Jeton de debug généré en console au premier lancement,
-        // à enregistrer dans Console Firebase > App Check > Applications.
-        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-      }
-      initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider(env.recaptchaSiteKey),
-        isTokenAutoRefreshEnabled: true,
-      });
-    } catch (error) {
-      console.warn('[LSSD] App Check non initialisé :', error);
-    }
-  }
-
+  attachAppCheck(app);
   return app;
 }
 
@@ -71,6 +93,11 @@ export const firebaseApp = createPrimaryApp();
  * statique : `createUserWithEmailAndPassword` connecte l'utilisateur créé).
  *
  * Instanciée à la demande — inutile de la créer pour tous les utilisateurs.
+ *
+ * Elle reçoit App Check comme l'instance principale : c'est précisément par
+ * elle que passent les créations de comptes, l'appel le plus sensible de
+ * l'application.
+ *
  * @returns {import('firebase/app').FirebaseApp}
  */
 export function getProvisioningApp() {
@@ -79,7 +106,10 @@ export function getProvisioningApp() {
   }
   const existing = findApp(PROVISIONING_APP_NAME);
   if (existing) return existing;
-  return initializeApp(env.firebase, PROVISIONING_APP_NAME);
+
+  const app = initializeApp(env.firebase, PROVISIONING_APP_NAME);
+  attachAppCheck(app);
+  return app;
 }
 
 /**

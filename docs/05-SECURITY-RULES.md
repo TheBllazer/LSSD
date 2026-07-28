@@ -7,17 +7,60 @@
 | Point | Décision |
 |---|---|
 | Fournisseur | **E-mail / mot de passe uniquement**. Google/Anonyme désactivés dans la console. |
-| Inscription publique | **Interdite**. Aucune UI d'inscription. Un compte sans document `/permissions/{uid}` ne peut rien lire : l'application affiche « Compte non provisionné — contactez un administrateur ». |
+| Inscription publique | **Aucune UI d'inscription.** Le réglage Firebase *Enable create (sign-up)* reste techniquement coché — il ne peut pas être réservé aux administrateurs (cf. §1 bis) — mais un compte sans document `/permissions/{uid}` ne peut rien lire : l'application affiche « Compte non provisionné — contactez un administrateur ». |
 | Création de comptes | Depuis `AgentCreateAccountDialog`, via une **instance Firebase secondaire** : `initializeApp(config, 'provisioning')` → `createUserWithEmailAndPassword` → `signOut(secondaryAuth)`. La session de l'administrateur n'est jamais interrompue. |
 | Persistance | `browserLocalPersistence` si « Rester connecté », sinon `browserSessionPersistence`. |
 | Réinitialisation | `sendPasswordResetEmail` déclenché par un administrateur (pas de lien public sur l'écran de connexion). |
 | Désactivation | `permissions/{uid}.disabled = true` → coupe-circuit **immédiat** côté règles, sans attendre l'expiration du jeton. Complété par la désactivation du compte dans la console pour le cas définitif. |
 | Journalisation | `LOGIN` / `LOGOUT` écrits dans `/auditLogs` + mise à jour de `agents/{uid}.lastLoginAt`. |
-| App Check | reCAPTCHA v3 activé en production (`VITE_RECAPTCHA_SITE_KEY`), mode debug en local. |
+| App Check | reCAPTCHA v3 (`VITE_RECAPTCHA_SITE_KEY`), mode debug en local. Attaché **aux deux instances** — principale et provisionnement. Mise en service : §1 ter. |
 
 > **Rappel** : la clé API Firebase d'une application web est publique par conception.
 > Elle n'autorise rien à elle seule — la sécurité repose intégralement sur les
 > règles Firestore ci-dessous.
+
+### 1 bis. Pourquoi la création de comptes reste ouverte côté Firebase
+
+Le réglage *Authentication → Settings → User actions → Enable create (sign-up)*
+doit rester **coché**. C'est une contrainte de Firebase, pas un choix de
+confort : `createUserWithEmailAndPassword` est un appel **non authentifié** —
+créer un compte, c'est devenir un nouvel utilisateur. Firebase n'a donc aucun
+appelant à inspecter et ne peut pas réserver l'opération aux administrateurs.
+Le réglage est binaire et global ; la seule alternative serait le SDK Admin,
+donc un serveur.
+
+La porte est refermée par deux mécanismes indépendants :
+
+| Mécanisme | Ce qu'il empêche |
+|---|---|
+| **App Check** (reCAPTCHA v3) | Les appels qui ne proviennent pas de l'application déclarée. Un script tiers muni de la clé API publique est rejeté avant d'atteindre Auth. |
+| **Absence de `/permissions/{uid}`** | Un compte créé hors du terminal n'a aucune habilitation. Il peut s'authentifier, et rien d'autre : chaque règle passe par `perms()`, qui échoue. L'écran « Compte non provisionné » s'affiche. |
+
+Le premier filtre l'accès à l'API, le second rend inoffensif tout compte qui
+passerait quand même. Aucun des deux ne dépend de l'interface.
+
+> **App Check est attaché à une instance Firebase, pas au projet.** L'instance
+> secondaire de provisionnement (`lssd-provisioning`) doit donc être attestée
+> elle aussi. Sans cela, la création de comptes — et elle seule — échouerait dès
+> l'activation de l'enforcement, le reste de l'application continuant de
+> fonctionner : une panne qu'on ne relie pas spontanément à sa cause.
+
+### 1 ter. Mise en service d'App Check
+
+1. **Console Firebase → App Check → Applications → enregistrer l'application web**,
+   fournisseur **reCAPTCHA v3**. Firebase renvoie une *clé de site*.
+2. Renseigner `VITE_RECAPTCHA_SITE_KEY` dans `.env.local` **puis reconstruire** :
+   la clé est lue au moment du build, pas à l'exécution.
+3. Déployer, vérifier que l'application fonctionne — les jetons sont émis et
+   comptabilisés alors même que l'enforcement est encore inactif.
+4. **App Check → API → Authentication et Cloud Firestore → Appliquer**, une fois
+   que les métriques montrent des requêtes attestées. Activer l'enforcement
+   avant cette vérification coupe l'accès à tout le monde, y compris soi-même.
+
+En développement, `self.FIREBASE_APPCHECK_DEBUG_TOKEN = true` fait afficher un
+jeton de debug dans la console du navigateur ; il doit être enregistré dans
+*App Check → Applications → ⋮ → Gérer les jetons de debug*, faute de quoi le
+poste local est rejeté dès l'enforcement actif.
 
 ---
 
