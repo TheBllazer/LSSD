@@ -4,6 +4,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
 import toast from 'react-hot-toast';
+import { describeAuthError } from '@/firebase/auth';
 import { CACHE, STORAGE_KEYS } from '@/app/config/constants';
 import { env } from '@/app/config/env';
 
@@ -30,12 +31,23 @@ const idbPersister = createAsyncStoragePersister({
 });
 
 /**
- * Traduit une erreur Firestore en message opérationnel.
+ * Traduit une erreur Firestore ou Authentication en message opérationnel.
+ *
+ * Les mutations du module Personnel touchent Authentication autant que
+ * Firestore : sans cette délégation, un code `auth/…` ressortait tel quel — le
+ * toast affichait « Firebase: Error (auth/admin-restricted-operation) », ce qui
+ * ne dit ni ce qui s'est passé, ni quoi faire.
+ *
  * @param {unknown} error
  * @returns {string}
  */
 function describeQueryError(error) {
   const code = typeof error === 'object' && error !== null ? error.code : '';
+
+  if (typeof code === 'string' && code.startsWith('auth/')) {
+    return describeAuthError(error);
+  }
+
   if (code === 'permission-denied') return "Accès refusé : permissions insuffisantes.";
   if (code === 'unavailable') return 'Service indisponible. Nouvelle tentative en cours…';
   if (code === 'failed-precondition') {

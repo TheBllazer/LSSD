@@ -157,6 +157,15 @@ export function describeAuthError(error) {
       return 'Mot de passe requis.';
     case 'auth/operation-not-allowed':
       return "L'authentification par e-mail n'est pas activée sur le projet Firebase.";
+    case 'auth/admin-restricted-operation':
+      // Firebase bloque toute création de compte depuis un client lorsque
+      // l'option « Enable create (sign-up) » est décochée. C'est un réglage du
+      // projet : aucune correction n'est possible depuis l'application.
+      return (
+        "Création de comptes désactivée sur le projet Firebase. " +
+        'Console Firebase → Authentication → Settings → User actions → ' +
+        'cocher « Enable create (sign-up) ».'
+      );
     case 'auth/configuration-not-found':
       return 'Configuration Firebase Authentication introuvable pour ce projet.';
     case 'auth/unauthorized-domain':
